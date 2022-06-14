@@ -2,3 +2,5 @@
 .env.test
 build
 node_modules
+package-lock.json
+yarn.lock

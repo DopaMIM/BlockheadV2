@@ -1,7 +1,3 @@
-//ftm vaults
-const ftm =
-'0x1066b8FC999c1eE94241344818486D5f944331A0'
-
 //Polygon Vaults
 const MATIC = 
 '0xa3fa99a148fa48d14ed51d610c367c61876997f1'
@@ -64,83 +60,132 @@ const abi = [{"inputs":[{"internalType":"address","name":"ethPriceSourceAddress"
 
 
 
-import { VoidSigner } from "ethers";
-const Web3 = require ('web3');
-var Accounts = require('web3-eth-accounts');
-var accounts = new Accounts(process.env.POLYGON_RPC)
+
+//console.log(ethers.version)
+const provider = new ethers.providers.JsonRpcProvider (process.env.POLYGON_RPC)
 
 
 const init = async () => {
     
+
+
+    var contractAddress = camWETH
+    var watchThese = new Array()
     
+   
+     const wallet = ethers.Wallet.fromMnemonic(process.env.MNEMONIC)
+    const signer = wallet.connect(provider);
+    var contract = new ethers.Contract(contractAddress, abi, signer)
     
-    const web3 = new Web3(process.env.POLYGON_RPC);
+    //var gas = 50111100000000
+    var minimumVaultSize = 1000000000000000000  //1000000000000000000   =   $1
 
 
-
-    var contractAddress = WETH
-    var contract = new web3.eth.Contract(abi, contractAddress)
-    
-
-//public Polygon url: https://polygon-rpc.com/
-
-//Public Fantom url: https://rpc.ftm.tools/
-
-    const vaultCount = await contract.methods.vaultCount().call();
+    const vaultCount = await contract.vaultCount();
     console.log("Number of Vaults   " + vaultCount)
-    let vaultID = 0;
+   
+
+
+    let vaultID =  0;
     while (vaultID <= vaultCount) {
     vaultID = vaultID + 1;
 
-    const exists = await contract.methods.exists(vaultID).call();
     
-        if (exists == true) 
-            {const checkLiquidation = await contract.methods.checkLiquidation(vaultID).call();
-                //console.log(vaultID)
-                if (checkLiquidation == true)
-                    {const checkCost = await contract.methods.checkCost(vaultID).call()
-                    console.log(checkCost/1000000000000000000)
-                    if (checkCost > 2000000000000000000) //10000000000000000000
-                    {(async() => {
-                        const provider = new ethers.providers.JsonRpcProvider (process.env.POLYGON_RPC)
-                        
-                        const gasPrice = provider.getGasPrice()
-                        const wallet = ethers.Wallet.fromMnemonic(process.env.MNEMONIC)
-                        const signer = wallet.connect(provider);
-                        const vaultContract = new ethers.Contract(contractAddress, abi, signer)
-                        
-                        
-                        const tx = {
-                            
-                            gasPrice: 101000000000,
-                            gasLimit: 3000000,
-                            nonce: provider.getTransactionCount(wallet.address, 'pending')
-                            
-                        };
-                       
-                            
-                            const transaction = await vaultContract.liquidateVault(vaultID, tx);
 
-                        
-                            
-                       
-                        
-                        //const receipt = await connection.waitForTransaction()
-                        console.log(transaction)
-                        })()
-                    }
-                    { console.log(vaultID)}
-                    
-                
-                    
-                       }}
-                                    
+    const exists = await contract.exists(vaultID);
+    console.log(vaultID, "camWETH")
+    
+        if (exists == true)  {
+       
+           // var vaultDebt  = await contract.vaultDebt(vaultID)
+            var checkCollateralPercentage = await contract.checkCollateralPercentage(vaultID)
+            var CollateralPercentage = checkCollateralPercentage.toNumber()
+            
+
+           // console.log(vaultID, CollateralPercentage)
+             var nearLiquidation = CollateralPercentage <135 && CollateralPercentage >130
+             if (nearLiquidation==true) {
+              
+              
+              var x = watchThese.push(vaultID)
+
+              console.log(vaultID, CollateralPercentage) 
+
+            
+                    }}
+                                
 
         if (exists == false) {console.log(". . .")}
-        if (vaultID == vaultCount) {init()}
+        
 
     }
+ 
+   
+
+    
+    { 
+  
+    for (var i = 0; i < watchThese.length; i++) { console.log(watchThese[i])
+        var vault = watchThese[i]
+
+    const checkLiquidation = await contract.checkLiquidation(watchThese[i])
+    console.log(checkLiquidation, "camWETH")
+   
+    
+   
+
+            if (checkLiquidation == true){
+             const checkCost = await contract.checkCost(vault);
+              console.log(vault + "   $"+checkCost/1000000000000000000);
+
         
+            if (checkCost > minimumVaultSize) {//10000000000000000000 
+        
+
+              //var vaultContract = new ethers.Contract(contractAddress, abi, signer)
+            var gasPrice = await provider.getGasPrice()
+            var gasPricetoNumber = gasPrice.toNumber()
+            var gas = gasPricetoNumber*4
+        
+             
+            
+            const tx = {
+                
+                gasPrice: gas,
+                gasLimit: 3000000,
+                nonce: provider.getTransactionCount(wallet.address, 'pending')
+                
+            };
+           
+                
+                const transaction = await contract.liquidateVault(vault, tx);
+               
+                console.log(transaction)
+                
+           
+           
+        }
+            
+           
+            
+              
+
+
+            if (watchThese.length<1){init()}
+        
+            
+        } 
+        else {watchThese.push(vault)}
+            
+        }
+       
+        
+    
+        
+           }
+           
+
 }
+
 init()
 

@@ -136,7 +136,7 @@ const init = async () => {
                 if (checkLiquidation == true)
                     {const checkCost = await contract.methods.checkCost(vaultID).call()
                     console.log(checkCost)
-                    if (checkCost > 1) //10000000000000000000
+                    if (checkCost > 1000000000000000000) //10000000000000000000
                     {(async() => {
                         const provider = new ethers.providers.JsonRpcProvider (publicFantomRPC)
                         
@@ -148,7 +148,7 @@ const init = async () => {
                         
                         const tx = {
                             
-                            gasPrice: 1001000000000,
+                            gasPrice: 101000000000,
                             gasLimit: 3000000,
                             nonce: provider.getTransactionCount(wallet.address, 'pending')
                             

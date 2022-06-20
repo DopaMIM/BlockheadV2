@@ -48,7 +48,7 @@ const SAND =
 
 const contracts = [WBTC,GHST,WETH]
 
-require('dotenv').config()
+//require('dotenv').config()
 
 
 

@@ -1,52 +1,52 @@
 //Polygon Vaults
-const MATIC = 
+var MATIC = 
 '0xa3fa99a148fa48d14ed51d610c367c61876997f1'
-const WETH =
+var WETH =
 '0x3fd939B017b31eaADF9ae50C7fF7Fa5c0661d47C'
-const LINK =
+var LINK =
 '0x61167073E31b1DAd85a3E531211c7B8F1E5cAE72'
-const AAVE =
+var AAVE =
 '0x87ee36f780ae843A78D5735867bc1c13792b7b11'
-const CRV =
+var CRV =
 '0x98B5F32dd9670191568b661a3e847Ed764943875'
-const BAL =
+var BAL =
 '0x701A1824e5574B0b6b1c8dA808B184a7AB7A2867'
-const dQUICK =
+var dQUICK =
 '0x649Aa6E6b6194250C077DF4fB37c23EE6c098513'
-const WBTC =
+var WBTC =
 '0x37131aEDd3da288467B6EBe9A77C523A700E6Ca1'
-const GHST =
+var GHST =
 '0xF086dEdf6a89e7B16145b03a6CB0C0a9979F1433'
-const camWMATIC =
+var camWMATIC =
 '0x88d84a85A87ED12B8f098e8953B322fF789fCD1a'
-const camWETH =
+var camWETH =
 '0x11A33631a5B5349AF3F165d2B7901A4d67e561ad'
-const camAAVE =
+var camAAVE =
 '0x578375c3af7d61586c2C3A7BA87d2eEd640EFA40'
-const camWBTC =
+var camWBTC =
 '0x7dda5e1a389e0c1892caf55940f5fce6588a9ae0'
-const camDAI =
+var camDAI =
 '0xD2FE44055b5C874feE029119f70336447c8e8827'
-const StakeDAOUSDStrategy =
+var StakeDAOUSDStrategy =
 '0x57cbf36788113237d64e46f25a88855c3dff1691'
-const FXS =
+var FXS =
 '0xff2c44fb819757225a176e825255a01b3b8bb051'
-const cxdoge =
+var cxdoge =
 '0x7CbF49E4214C7200AF986bc4aACF7bc79dd9C19a'
-const cxADA=
+var cxADA=
 '0x506533B9C16eE2472A6BF37cc320aE45a0a24F11'
-const cxWETH =
+var cxWETH =
 '0x7d36999a69f2b99bf3fb98866cbbe47af43696c8'
-const vGHST =
+var vGHST =
 '0x1f0aa72b980d65518e88841ba1da075bd43fa933'
-const CEL =
+var CEL =
 '0x178f1c95c85fe7221c7a6a3d6f12b7da3253eeae'
-const WMATIC =
+var WMATIC =
 '0x305f113ff78255d4f8524c8f50c7300b91b10f6a'
-const SAND = 
+var SAND = 
 "0x1dcc1f864a4bd0b8f4ad33594b758b68e9fa872c"
 
-const contracts = [WBTC,GHST,WETH]
+var contracts = [WBTC,GHST,WETH]
 
 require('dotenv').config()
 

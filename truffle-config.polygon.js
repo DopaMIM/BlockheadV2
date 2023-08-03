@@ -26,11 +26,9 @@ module.exports = {
       network_id: "*",       // Any network (default: none)
     },
     //polygon Infura mainnet
-    polygon_infura_mainnet: {
+    polygon: {
       provider: () => new HDWalletProvider({
-        mnemonic: {
-          phrase: mnemonic
-        },
+        mnemonic: process.env.MNEMONIC,
         providerOrUrl:
          process.env.POLYGON_RPC
       }),
@@ -54,7 +52,9 @@ module.exports = {
       timeoutBlocks: 200,
       skipDryRun: true,
       chainId: 80001
+      
     }
+    
   },
 
   // Set default mocha options here, use special reporters etc.
@@ -70,4 +70,5 @@ module.exports = {
   db: {
     enabled: true
   }
+  
 }

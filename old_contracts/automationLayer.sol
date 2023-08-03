@@ -33,8 +33,6 @@ interface sequencer {
 contract AutomationLayer {
     struct Accounts {
         address account;
-        uint256 id;
-        uint256 accountCreationFee;
         bool cancelled;
     }
 
@@ -44,14 +42,11 @@ contract AutomationLayer {
 
     address public owner;
     uint256 public totalAccounts;
-    address public duh ;
+    address public duh;
     uint256 public minimumDuh;
     address public sequencerAddress;
     address public WMATIC = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270;
     uint256 public automationFee = 100;
-
-    mapping(uint256 => Accounts) public accountsByNumber;
-    mapping(address => uint256[]) public accountsByAddress;
 
     event AccountCreated(address indexed customer);
     event AccountCancelled(uint256 indexed index, address indexed account);
@@ -62,7 +57,7 @@ contract AutomationLayer {
         minimumDuh = 0;
 
         duh = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174; //USDC on Polygon
-       // duh = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2; //WETH on Ethereum
+        //duh = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2; //WETH on Ethereum
     }
 
     modifier onlyOwner() {
@@ -90,28 +85,20 @@ contract AutomationLayer {
     }
 
     //contracts call create account to register a new account to be automated
-    function createAccount(uint256 id) external {
+    function createAccount() external returns (uint256) {
         totalAccounts++;
-        address _accountAddress = msg.sender;
-        Accounts memory newAccount = Accounts(
-            _accountAddress,
-            id,
-            automationFee,
-            false
-        );
+        address _account = msg.sender;
+        Accounts memory newAccount = Accounts(_account, false);
+        accounts.push(newAccount);
 
-        accountsByNumber[totalAccounts] = newAccount;
-        accountsByAddress[_accountAddress].push(totalAccounts); // Add the new account number to the array
+        addressToIndices[_account].push(accounts.length - 1);
 
-        emit AccountCreated(_accountAddress);
+        emit AccountCreated(_account);
+        return accounts.length - 1;
     }
 
     //If transaction is ready to be triggered, nodes call trigger function
-    function simpleAutomation(uint256 index)
-        external
-        hasSufficientTokens
-        isCurrentNode
-    {
+    function simpleAutomation(uint256 index) external hasSufficientTokens isCurrentNode {
         require(index < totalAccounts, "Invalid account index");
 
         Accounts storage account = accounts[index];
@@ -119,17 +106,14 @@ contract AutomationLayer {
 
         emit TransactionSuccess(index);
 
-        Automate(account.account).simpleAutomation(account.id);
+        
+            Automate(account.account).simpleAutomation(index);
         // Transfer the tokens
         /*  require(
             IERC20(duh).transferFrom(account.account, tx.origin, automationFee),
             "Fee transfer failed."
         );
         */
-    }
-
-    function transferFee() internal {
-        IERC20(duh).transferFrom(msg.sender, owner, automationFee);
     }
 
     // check to se if tranaction is ready to be triggered
@@ -145,7 +129,7 @@ contract AutomationLayer {
         require(index < totalAccounts, "Invalid payment index");
 
         Accounts storage account = accounts[index];
-        require(account.cancelled == false);
+
         require(
             msg.sender == account.account,
             "Only account creator can cancel account"
@@ -165,10 +149,6 @@ contract AutomationLayer {
         return addressToIndices[accountAddress];
     }
 
-    function setAutomationFee(uint256 _automationFee) external onlyOwner {
-        automationFee = _automationFee;
-    }
-
     //check if account has been cancelled before calling trigger
     function isAccountCanceled(uint256 index) external view returns (bool) {
         require(index < totalAccounts, "Invalid account index");
@@ -177,8 +157,10 @@ contract AutomationLayer {
 
         return account.cancelled;
     }
-
-    function setSequencerAddress(address _sequencerAddress) external onlyOwner {
+        function setSequencerAddress(address _sequencerAddress)
+        external
+        onlyOwner
+    {
         sequencerAddress = _sequencerAddress;
     }
 

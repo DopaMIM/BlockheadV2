@@ -26,6 +26,8 @@ interface IERC20 {
 
 interface AutomationLayer {
     function createAccount(uint256 id) external;
+
+    function cancelAccount(uint256 id) external;
 }
 
 contract RecurringPayments {
@@ -70,15 +72,15 @@ contract RecurringPayments {
     uint256 public serviceFee = 9900;
     uint256 public precission = 10000;
     uint256 public feeSplit = 5000;
-    uint256 public automationFee = 0;
+  
 
     mapping(uint256 => RecurringPayment) public recurringPayments;
-    mapping(address => uint256[]) public accountNumberByAddress;
+    mapping(address => uint256[]) internal accountNumberByAddress;
 
     constructor() {
         owner = msg.sender;
-        // duh = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
-        duh = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+         duh = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
+       // duh = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     }
 
     modifier onlyOwner() {
@@ -100,7 +102,7 @@ contract RecurringPayments {
     ) external {
         require(_amount > 0, "Payment amount must be greater than zero");
         address _sender = msg.sender;
-        totalPayments++;
+        
         uint256 paymentDue = block.timestamp + _freeTrialTimeInSeconds;
         uint256 accountNumber = totalPayments;
 
@@ -118,6 +120,8 @@ contract RecurringPayments {
             paymentDue,
             false
         );
+
+        totalPayments++;
 
         recurringPayments[accountNumber] = payment; // Store payment details in the mapping
         accountNumberByAddress[_sender].push(accountNumber); // Store account number for the sender address
@@ -187,6 +191,14 @@ contract RecurringPayments {
         );
     }
 
+    function getAccountNumbersByAddress(address accountAddress)
+        external
+        view
+        returns (uint256[] memory)
+    {
+        return accountNumberByAddress[accountAddress];
+    }
+
     function getCurrentBlockTimestamp() external view returns (uint256) {
         return block.timestamp;
     }
@@ -214,32 +226,29 @@ contract RecurringPayments {
             payment.paymentDue < block.timestamp && payment.canceled == false;
     }
 
-    function cancelRecurringPayment(uint256 index) external {
-        require(index < totalPayments, "Invalid payment index");
+    function cancelRecurringPayment(uint256 accountNumber) external {
+        require(accountNumber < totalPayments, "Invalid payment index");
 
-        RecurringPayment storage payment = recurringPayments[index];
+        RecurringPayment storage payment = recurringPayments[accountNumber];
 
         require(
-            msg.sender == payment.sender || msg.sender == payment.recipient,
+            msg.sender == payment.sender ||
+                msg.sender == payment.recipient ||
+                msg.sender == owner,
             "Only the payment sender or recipient can cancel the recurring payment."
         );
 
         payment.canceled = true;
+        AutomationLayer(automationLayerAddress).cancelAccount(accountNumber);
 
         emit RecurringPaymentCancelled(
-            index,
+            accountNumber,
             payment.sender,
             payment.recipient
         );
     }
 
-    function getAccountNumber(address accountAddress)
-        external
-        view
-        returns (uint256[] memory)
-    {
-        return accountNumberByAddress[accountAddress];
-    }
+
 
     function isSubscriptionValid(uint256 accountNumber)
         external

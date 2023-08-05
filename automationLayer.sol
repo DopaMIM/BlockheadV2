@@ -38,18 +38,16 @@ contract AutomationLayer {
         bool cancelled;
     }
 
-    mapping(address => bool) public isNodeRegistered;
     mapping(uint256 => Accounts) public accountsByNumber;
     mapping(address => uint256[]) public accountsByAddress;
 
     address public owner;
     uint256 public totalAccounts;
     address public duh;
-    uint256 public minimumDuh;
     address public sequencerAddress;
-    address public WMATIC = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270;
     uint256 public automationFee;
     address public duhOracle;
+    uint256[] public cancelledAccounts;
 
     event AccountCreated(address indexed customer);
     event AccountCancelled(uint256 indexed index, address indexed account);
@@ -57,10 +55,7 @@ contract AutomationLayer {
 
     constructor() {
         owner = msg.sender;
-        minimumDuh = 0;
 
-        duh = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174; //USDC on Polygon
-        // duh = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2; //WETH on Ethereum
     }
 
     modifier onlyOwner() {
@@ -70,14 +65,14 @@ contract AutomationLayer {
         );
         _;
     }
-        modifier onlyOracle() {
+    modifier onlyOracle() {
         require(
             msg.sender == duhOracle,
             "Only the oracle can call this function."
         );
         _;
     }
-    
+
     // check to see if nodes have enough tokens to be valid nodes
     modifier hasSufficientTokens() {
         require(
@@ -109,6 +104,8 @@ contract AutomationLayer {
         accountsByAddress[_accountAddress].push(totalAccounts); // Add the new account number to the array
         totalAccounts++;
         emit AccountCreated(_accountAddress);
+
+        transferFee();
     }
 
     //If transaction is ready to be triggered, nodes call trigger function
@@ -117,7 +114,7 @@ contract AutomationLayer {
         hasSufficientTokens
         isCurrentNode
     {
-        require(accountNumber < totalAccounts, "Invalid account index");
+        require(accountNumber < totalAccounts, "Invalid account number");
 
         Accounts storage account = accountsByNumber[accountNumber];
         require(!account.cancelled, "The profile has been canceled.");
@@ -126,11 +123,10 @@ contract AutomationLayer {
 
         Automate(account.account).simpleAutomation(account.id);
         // Transfer the tokens
-          require(
+        require(
             IERC20(duh).transferFrom(account.account, tx.origin, automationFee),
             "Fee transfer failed."
         );
-        
     }
 
     function transferFee() internal {
@@ -144,7 +140,9 @@ contract AutomationLayer {
         returns (bool)
     {
         Accounts storage account = accountsByNumber[accountNumber];
-        return account.cancelled==false && Automate(account.account).checkSimpleAutomation(account.id);
+        return
+            account.cancelled == false &&
+            Automate(account.account).checkSimpleAutomation(account.id);
     }
 
     function getAccountsByAddress(address accountAddress)
@@ -165,6 +163,7 @@ contract AutomationLayer {
         );
 
         account.cancelled = true;
+        cancelledAccounts.push(accountNumber);
 
         IERC20(duh).transferFrom(
             owner,
@@ -203,8 +202,16 @@ contract AutomationLayer {
         duhOracle = _DuhOracle;
     }
 
+    function setDuh(address _duh) external onlyOwner {
+        duh = _duh;
+    }
+
     function setSequencerAddress(address _sequencerAddress) external onlyOwner {
         sequencerAddress = _sequencerAddress;
+    }
+
+    function getCancelledAccounts() external view returns (uint256[] memory) {
+        return cancelledAccounts;
     }
 
     function transferOwnership(address newOwner) external onlyOwner {

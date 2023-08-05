@@ -1,4 +1,4 @@
-pragma solidity ^0.8.19;
+pragma solidity ^0.5.17;
 
 //Safe Math Interface
 
@@ -29,9 +29,9 @@ contract SafeMath {
 //ERC Token Standard #20 Interface
 
 contract ERC20Interface {
-    function totalSupply() public constant returns (uint);
-    function balanceOf(address tokenOwner) public constant returns (uint balance);
-    function allowance(address tokenOwner, address spender) public constant returns (uint remaining);
+    function totalSupply() public view returns (uint);
+    function balanceOf(address tokenOwner) public view returns (uint balance);
+    function allowance(address tokenOwner, address spender) public view returns (uint remaining);
     function transfer(address to, uint tokens) public returns (bool success);
     function approve(address spender, uint tokens) public returns (bool success);
     function transferFrom(address from, address to, uint tokens) public returns (bool success);
@@ -44,8 +44,9 @@ contract ERC20Interface {
 //Contract function to receive approval and execute function in one call
 
 contract ApproveAndCallFallBack {
-    function receiveApproval(address from, uint256 tokens, address token, bytes data) public;
+    function receiveApproval(address from, uint256 tokens, address token, bytes memory data) public;
 }
+
 
 //Actual token contract
 
@@ -61,17 +62,17 @@ contract DUHToken is ERC20Interface, SafeMath {
     constructor() public {
         symbol = "DUH";
         name = "Duh";
-        decimals = 2;
-        _totalSupply = 100000000*10^18;
+        decimals = 18;
+        _totalSupply = 100000000*10**18;
         balances[msg.sender] = _totalSupply;
         emit Transfer(address(0), msg.sender, _totalSupply);
     }
 
-    function totalSupply() public constant returns (uint) {
+    function totalSupply() public view returns (uint) {
         return _totalSupply  - balances[address(0)];
     }
 
-    function balanceOf(address tokenOwner) public constant returns (uint balance) {
+    function balanceOf(address tokenOwner) public view returns (uint balance) {
         return balances[tokenOwner];
     }
 
@@ -96,18 +97,19 @@ contract DUHToken is ERC20Interface, SafeMath {
         return true;
     }
 
-    function allowance(address tokenOwner, address spender) public constant returns (uint remaining) {
+    function allowance(address tokenOwner, address spender) public view returns (uint remaining) {
         return allowed[tokenOwner][spender];
     }
 
-    function approveAndCall(address spender, uint tokens, bytes data) public returns (bool success) {
+    function approveAndCall(address spender, uint tokens, bytes memory  data) public returns (bool success) {
         allowed[msg.sender][spender] = tokens;
         emit Approval(msg.sender, spender, tokens);
-        ApproveAndCallFallBack(spender).receiveApproval(msg.sender, tokens, this, data);
+        ApproveAndCallFallBack(spender).receiveApproval(msg.sender, tokens, address(this), data);
         return true;
     }
+    
 
-    function () public payable {
+     function fallback () public payable {
         revert();
     }
 }

@@ -14,6 +14,8 @@ interface IERC20 {
 
     function balanceOf(address account) external view returns (uint256);
 
+    function transfer(address reciever, uint256 amount) external returns (bool);
+
     function approve(address spender, uint256 amount) external returns (bool);
 }
 
@@ -33,17 +35,17 @@ interface IUniswapV2Router02 {
 }
 
 interface automationLayer {
-    function setAutomationFee(uint256 newAutomationFee) external;
+    function setAutomationFeeByOracle(uint256 newAutomationFee) external;
 
     function createAccount(uint256 id) external;
 }
 
 contract duhOracle {
-    address duh = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270 ;
+    address duh = 0xAf65d42Beb8576E56190B1A1B960204003F7a916;
     address stable = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
     uint256 updateTimer = block.timestamp;
     uint256 updateIntervalSeconds = 3000;
-    uint256 duhFeeUSD =100;
+    uint256 duhFeeUSD = 5000;
     address automationLayerAddress;
     address uniswapRouterAddress = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
     address owner;
@@ -73,7 +75,7 @@ contract duhOracle {
         return (getAmountsOut[1]);
     }
 
-    function checkSimpleAutomation() external view returns (bool) {
+    function checkSimpleAutomation(uint automationAccountNumber) external view returns (bool) {
         return (updateTimer < block.timestamp);
     }
 
@@ -84,14 +86,19 @@ contract duhOracle {
 
         uint256 newDuhFee = duhFeeUSD / duhPriceUSD;
 
-        automationLayer(automationLayerAddress).setAutomationFee(newDuhFee);
+        automationLayer(automationLayerAddress).setAutomationFeeByOracle(
+            newDuhFee
+        );
     }
 
-    function setuniswapRouterAddress(address _uniswapRouterAddress) external onlyOwner {
+    function setuniswapRouterAddress(address _uniswapRouterAddress)
+        external
+        onlyOwner
+    {
         uniswapRouterAddress = _uniswapRouterAddress;
     }
 
-       function setDuhAddress(address _duhAddress) external onlyOwner {
+    function setDuhAddress(address _duhAddress) external onlyOwner {
         duh = _duhAddress;
     }
 
@@ -103,8 +110,29 @@ contract duhOracle {
         updateTimer = block.timestamp;
     }
 
+    function setDuhFeeUSD(uint256 _duhFeeUSD) external onlyOwner {
+        duhFeeUSD = _duhFeeUSD;
+    }
+
     function automateMe(uint256 id) external onlyOwner {
         automationLayer(automationLayerAddress).createAccount(id);
+    }
+
+    function withdraw(address token) external onlyOwner {
+        uint256 balance = IERC20(token).balanceOf(address(this));
+        require(balance > 0, "No balance to withdraw");
+
+        require(
+            IERC20(token).transfer(owner, balance),
+            "Token transfer failed"
+        );
+    }
+
+    function approveAutomationFee(uint256 approvalAmount) external onlyOwner {
+        require(
+            IERC20(duh).approve(automationLayerAddress, approvalAmount),
+            "failed to approve token spend"
+        );
     }
 
     function setAutomationLayerAddress(address _automationLayerAddress)

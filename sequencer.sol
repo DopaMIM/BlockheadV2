@@ -2,7 +2,7 @@
 // This code is proprietary and confidential. All rights reserved.
 // Proprietary code by Levi Webb
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.19;
 
 interface IERC20 {
     function transferFrom(
@@ -34,8 +34,7 @@ contract NodeSequencer {
 
         minimumDuh = 0;
         blockNumberRange = 1000;
-        duh = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174; //USDC on Polygon
-        //duh = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2; //WETH on Ethereum
+
     }
 
     modifier onlyOwner() {
@@ -90,11 +89,21 @@ contract NodeSequencer {
         return (totalNodes);
     }
 
-
     function removeNode(uint256 index) external {
         bool validateNode = IERC20(duh).balanceOf(registeredNodes[index]) >=
             minimumDuh;
-        require(validateNode == false, "node is valid");
+        require(
+            validateNode == false || msg.sender == registeredNodes[index],
+            "node is valid or can only be removed by node owner"
+        );
+        isNodeRegistered[registeredNodes[index]] = false;
+        registeredNodes[index] = registeredNodes[registeredNodes.length - 1];
+
+        // Decrease the length of the array
+        registeredNodes.pop();
+    }
+
+    function banNode(uint256 index) external onlyOwner {
         registeredNodes[index] = registeredNodes[registeredNodes.length - 1];
 
         // Decrease the length of the array

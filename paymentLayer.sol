@@ -18,10 +18,7 @@ interface IERC20 {
 
     function balanceOf(address account) external view returns (uint256);
 
-    function approve(address spender, uint256 amount)
-        external
-        view
-        returns (bool);
+    function approve(address spender, uint256 amount) external returns (bool);
 }
 
 interface AutomationLayer {
@@ -72,15 +69,15 @@ contract RecurringPayments {
     uint256 public serviceFee = 9900;
     uint256 public precission = 10000;
     uint256 public feeSplit = 5000;
-  
+    uint256[] public cancelledAccounts;
 
     mapping(uint256 => RecurringPayment) public recurringPayments;
     mapping(address => uint256[]) internal accountNumberByAddress;
 
     constructor() {
         owner = msg.sender;
-         duh = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
-       // duh = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+        duh = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
+        // duh = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     }
 
     modifier onlyOwner() {
@@ -102,7 +99,7 @@ contract RecurringPayments {
     ) external {
         require(_amount > 0, "Payment amount must be greater than zero");
         address _sender = msg.sender;
-        
+
         uint256 paymentDue = block.timestamp + _freeTrialTimeInSeconds;
         uint256 accountNumber = totalPayments;
 
@@ -239,6 +236,7 @@ contract RecurringPayments {
         );
 
         payment.canceled = true;
+        cancelledAccounts.push(accountNumber);
         AutomationLayer(automationLayerAddress).cancelAccount(accountNumber);
 
         emit RecurringPaymentCancelled(
@@ -247,8 +245,6 @@ contract RecurringPayments {
             payment.recipient
         );
     }
-
-
 
     function isSubscriptionValid(uint256 accountNumber)
         external
@@ -295,15 +291,15 @@ contract RecurringPayments {
         automationLayerAddress = _automationLayerAddress;
     }
 
-    function approveAutomationFee(uint256 approvalAmount)
-        external
-        view
-        onlyOwner
-    {
+    function approveAutomationFee(uint256 approvalAmount) external onlyOwner {
         require(
             IERC20(duh).approve(automationLayerAddress, approvalAmount),
             "failed to approve token spend"
         );
+    }
+
+    function getCancelledAccounts() external view returns (uint256[] memory) {
+        return cancelledAccounts;
     }
 
     function setServiceFee(uint256 _serviceFee) external onlyOwner {
@@ -322,6 +318,10 @@ contract RecurringPayments {
             IERC20(token).transfer(owner, balance),
             "Token transfer failed"
         );
+    }
+
+    function setDuhAddress(address _duh) external onlyOwner {
+        duh = _duh;
     }
 
     function transferOwnership(address newOwner) external onlyOwner {

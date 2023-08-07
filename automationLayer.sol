@@ -40,6 +40,8 @@ contract AutomationLayer {
 
     mapping(uint256 => Accounts) public accountsByNumber;
     mapping(address => uint256[]) public accountsByAddress;
+ mapping(address => mapping(uint256 => uint256)) private accountNumberByAddressAndId;
+
 
     address public owner;
     uint256 public totalAccounts;
@@ -92,6 +94,7 @@ contract AutomationLayer {
 
     //contracts call create account to register a new account to be automated
     function createAccount(uint256 id) external {
+        require(accountNumberByAddressAndId[msg.sender][id] == 0, "Account already exists with the same sender and id");
         address _accountAddress = msg.sender;
         Accounts memory newAccount = Accounts(
             _accountAddress,
@@ -102,6 +105,7 @@ contract AutomationLayer {
 
         accountsByNumber[totalAccounts] = newAccount;
         accountsByAddress[_accountAddress].push(totalAccounts); // Add the new account number to the array
+        accountNumberByAddressAndId[_accountAddress][id] = totalAccounts;
         totalAccounts++;
         emit AccountCreated(_accountAddress);
 
@@ -154,7 +158,8 @@ contract AutomationLayer {
     }
 
     //Contracts call this function to cancel an account
-    function cancelAccount(uint256 accountNumber) external {
+    function cancelAccount(uint256 id) external {
+      uint accountNumber =  accountNumberByAddressAndId[msg.sender][id];
         Accounts storage account = accountsByNumber[accountNumber];
         require(account.cancelled == false);
         require(

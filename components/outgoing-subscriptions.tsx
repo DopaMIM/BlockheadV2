@@ -74,11 +74,11 @@ function useRecurringPayments() {
   //   subscription.payments = payments
   // }
   
-  return [recurringPayments]
+  return recurringPayments
 }
 
 export const OutgoingSubscriptions = () => {
-  const [recurringPayments] = useRecurringPayments()
+  const recurringPayments = useRecurringPayments()
   const recurringPaymentContract = useRecurringPaymentContract()
   
   async function cancelRecurringPayment(accountNumber: BigNumberish) {

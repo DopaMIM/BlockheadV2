@@ -56,7 +56,7 @@ function useSubscriptionsPayments(subscriptions: any[]) {
   //   subscription.payments = payments
   // }
   
-  return [recurringPayments]
+  return recurringPayments
 }
 
 function useSubscriptions() {
@@ -91,9 +91,9 @@ function useSubscriptions() {
 }
 
 export const Subscriptions = () => {
-  const [subscriptions, loading] = useSubscriptions()
+  const subscriptions = useSubscriptions()
   const {account} = useEthers()
-  const [recurringPayments] = useSubscriptionsPayments(subscriptions)
+  const recurringPayments = useSubscriptionsPayments(subscriptions)
   const recurringPaymentContract = useRecurringPaymentContract()
   
   async function cancelRecurringPayment(accountNumber: BigNumberish) {

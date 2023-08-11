@@ -7,6 +7,7 @@ import {
   WETH_ADDRESS,
   WMATIC_ADDRESS
 } from "@/constants";
+import {BigNumberish} from "@ethersproject/bignumber";
 import {formatUnits, parseUnits} from "@ethersproject/units";
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
@@ -15,14 +16,14 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function reformatContractFunctionResult(result) {
+export function reformatContractFunctionResult(result: any) {
   if (result?.length) {
-    return result.map((item) => item.toString())
+    return result.map((item: any) => item.toString())
   }
   return result
 }
 
-export function frequencyToSeconds(frequency) {
+export function frequencyToSeconds(frequency: string) {
   switch(frequency) {
     case 'none':
       return 0
@@ -40,11 +41,11 @@ export function frequencyToSeconds(frequency) {
   }
 }
 
-export function paymentDueSecondsToDays(seconds) {
+export function paymentDueSecondsToDays(seconds: number) {
   return Math.round(seconds / 86400)
 }
 
-export function getTokenName(tokenAddress) {
+export function getTokenName(tokenAddress: string) {
   if (tokenAddress === DAI_ADDRESS) {
     return 'dai'
   }
@@ -69,7 +70,7 @@ export function getTokenName(tokenAddress) {
   return 'unknown'
 }
 
-export function getTokenAddress(tokenName) {
+export function getTokenAddress(tokenName: string) {
   if (tokenName === 'dai') {
     return DAI_ADDRESS
   }
@@ -96,7 +97,7 @@ export function getTokenAddress(tokenName) {
 
 // use contract.decimals() to get decimals...
 // these are for testing
-export function formatAmount(amount, tokenAddress) {
+export function formatAmount(amount: BigNumberish, tokenAddress: string) {
   if (tokenAddress === DAI_ADDRESS) {
     return formatUnits(amount, 18)
   }
@@ -121,7 +122,7 @@ export function formatAmount(amount, tokenAddress) {
   return amount
 }
 
-export function parseAmount(amount, tokenAddress) {
+export function parseAmount(amount: BigNumberish, tokenAddress: string) {
   if (typeof amount !== 'string') {
     amount = amount.toString()
   }

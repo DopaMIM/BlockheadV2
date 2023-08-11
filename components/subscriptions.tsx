@@ -1,15 +1,13 @@
 "use client";
 
 import {Button, buttonVariants} from "@/components/ui/button";
-import {RECURRING_PAYMENT_CONTRACT} from "@/constants";
-import {recurringPaymentsABI} from "@/lib/recurring-payments-abi";
 import {useRecurringPaymentContract} from "@/lib/use-recurring-payment-contract";
-import {cn, getTokenAddress, getTokenName, paymentDueSecondsToDays} from "@/lib/utils";
+import {cn, getTokenAddress, paymentDueSecondsToDays} from "@/lib/utils";
+import {BigNumberish} from "@ethersproject/bignumber";
 import {createClientComponentClient} from "@supabase/auth-helpers-nextjs";
-import {useEthers, useSigner} from "@usedapp/core";
-import {Contract, utils} from "ethers";
+import {useEthers} from "@usedapp/core";
 import Link from "next/link";
-import {useRouter} from "next/navigation";
+import type {Subscription} from "@/lib/validations/subscription";
 import React, {useEffect, useState} from "react";
 import _ from "lodash"
 
@@ -24,7 +22,7 @@ function useSubscriptionsPayments(subscriptions: any[]) {
   useEffect(() => {
     async function inner() {
       try {
-        if (loaded) {
+        if (!recurringPaymentContract || loaded) {
           return
         }
         const currentBlockTimestamp = await recurringPaymentContract.getCurrentBlockTimestamp()
@@ -51,10 +49,7 @@ function useSubscriptionsPayments(subscriptions: any[]) {
         console.error(e)
       }
     }
-    
-    if (recurringPaymentContract) {
-      inner()
-    }
+    inner()
   }, [recurringPaymentContract, subscriptions])
   
   // for (const subscription of data) {
@@ -92,17 +87,16 @@ function useSubscriptions() {
     inner()
   }, [])
   
-  return [data, loading]
+  return data
 }
 
 export const Subscriptions = () => {
-  const [recurringPaymentTemplates, loading] = useSubscriptions()
+  const [subscriptions, loading] = useSubscriptions()
   const {account} = useEthers()
-  const [recurringPayments] = useSubscriptionsPayments(account, recurringPaymentTemplates)
+  const [recurringPayments] = useSubscriptionsPayments(subscriptions)
   const recurringPaymentContract = useRecurringPaymentContract()
-  const router = useRouter()
   
-  async function cancelRecurringPayment(accountNumber) {
+  async function cancelRecurringPayment(accountNumber: BigNumberish) {
     if (!recurringPaymentContract) {
       return
     }
@@ -113,7 +107,7 @@ export const Subscriptions = () => {
     }
   }
   
-  async function deleteSubscription(subscription) {
+  async function deleteSubscription(subscription: Subscription) {
     if (_.keys(recurringPayments[subscription.id]).length > 0) {
       return
     }
@@ -164,7 +158,7 @@ export const Subscriptions = () => {
             </div>
             <div></div>
           </div>
-            {recurringPaymentTemplates.map(({
+            {subscriptions.map(({
                                               id, meta: {
                 logoUrl,
                 recipientName,
@@ -176,7 +170,7 @@ export const Subscriptions = () => {
                 frequency,
                 trial,
               }
-                                            }) => {
+                                            }: Subscription) => {
               const tokenAddress = getTokenAddress(token)
               //const amountFormatted = BigNumber.from(amount)
               //const amountToken = formatAmount(amount, token)
@@ -196,7 +190,7 @@ export const Subscriptions = () => {
                   <div className="flex justify-between space-x-1">
                     <Link href={`/pay/${id}`}
                           className={cn(buttonVariants({variant: 'outline', size: 'sm', className: ''}))}>Preview</Link>
-                    {!_.keys(recurringPayments[id]).length && (<Button variant="outline" size="sm" onClick={() => deleteSubscription({id})}>Delete</Button>)}
+                    {!_.keys(recurringPayments[id]).length && (<Button variant="outline" size="sm" onClick={() => deleteSubscription({id} as Subscription)}>Delete</Button>)}
                   </div>
                   {_.keys(recurringPayments[id]).length > 0 && (
                     <div className="col-span-8 mb-6 mx-4 -mt-1">

@@ -13,8 +13,8 @@ import {Icons} from "@/components/icons"
 import {useRouter, useSearchParams} from "next/navigation";
 import {useState} from "react";
 import {useForm} from "react-hook-form";
-import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod";
 
 type FormData = z.infer<typeof userAuthSchema>
 

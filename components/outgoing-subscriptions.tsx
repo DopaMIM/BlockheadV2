@@ -5,6 +5,7 @@ import {RECURRING_PAYMENT_CONTRACT} from "@/constants";
 import {recurringPaymentsABI} from "@/lib/recurring-payments-abi";
 import {useRecurringPaymentContract} from "@/lib/use-recurring-payment-contract";
 import {cn, formatAmount, getTokenAddress, getTokenName, paymentDueSecondsToDays} from "@/lib/utils";
+import {BigNumberish} from "@ethersproject/bignumber";
 import {createClientComponentClient} from "@supabase/auth-helpers-nextjs";
 import {useEthers, useSigner} from "@usedapp/core";
 import {Contract, utils, BigNumber} from "ethers";
@@ -22,7 +23,7 @@ function useRecurringPayments() {
   const signer = useSigner()
   
   let recurringPaymentContractInterface
-  let recurringPaymentContract
+  let recurringPaymentContract: Contract | undefined = undefined
   if (account && signer) {
     recurringPaymentContractInterface = new utils.Interface(recurringPaymentsABI)
     recurringPaymentContract = new Contract(RECURRING_PAYMENT_CONTRACT, recurringPaymentContractInterface, signer)
@@ -31,7 +32,7 @@ function useRecurringPayments() {
   useEffect(() => {
     async function inner() {
       try {
-        if (loaded) {
+        if (loaded || !recurringPaymentContract) {
           return
         }
         setLoaded(true)
@@ -66,10 +67,7 @@ function useRecurringPayments() {
         console.error(e)
       }
     }
-    
-    if (recurringPaymentContract) {
-      inner()
-    }
+    inner()
   }, [recurringPaymentContract])
   
   // for (const subscription of data) {
@@ -83,7 +81,7 @@ export const OutgoingSubscriptions = () => {
   const [recurringPayments] = useRecurringPayments()
   const recurringPaymentContract = useRecurringPaymentContract()
   
-  async function cancelRecurringPayment(accountNumber) {
+  async function cancelRecurringPayment(accountNumber: BigNumberish) {
     if (!recurringPaymentContract) {
       return
     }
@@ -142,7 +140,7 @@ export const OutgoingSubscriptions = () => {
                   <div>{subscription?.meta?.productName}</div>
                   <div>{subscription?.meta?.network}</div>
                   <div className="truncate">{token.toUpperCase()}</div>
-                  <div className="truncate">{formatAmount(amount, token)} {getTokenName(token).toUpperCase()}</div>
+                  <div className="truncate"><>{formatAmount(amount, token)} {getTokenName(token).toUpperCase()}</></div>
                   <div>{paymentDueSecondsToDays(paymentDue)} days</div>
                   <div>{!cancelled ? 'Yes' : 'No'}</div>
                   <div>

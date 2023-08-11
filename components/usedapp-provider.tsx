@@ -6,7 +6,7 @@ import { providers } from "ethers";
 import {ALCHEMY_API_KEY, INFURA_API_KEY, SepoliaTestNetwork} from "@/constants";
 
 //const provider = new providers.AlchemyProvider('sepolia', ALCHEMY_API_KEY);
-const provider = new providers.InfuraProvider('sepolia', INFURA_API_KEY);
+const provider = new providers.InfuraProvider('sepolia'/*, INFURA_API_KEY*/);
 provider.pollingInterval = 3000
 const useDappConfig: Config = {
   readOnlyChainId: SepoliaTestNetwork.chainId, //Polygon.chainId,

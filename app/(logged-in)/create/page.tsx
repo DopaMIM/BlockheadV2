@@ -23,7 +23,7 @@ import {redirect, useRouter} from "next/navigation";
 import {useEffect} from "react";
 import {useForm} from "react-hook-form";
 import {Polygon, useEthers} from "@usedapp/core";
-import * as z from 'zod';
+import * as z from "zod";
 
 type FormData = z.infer<typeof subscriptionSchema>
 
@@ -302,7 +302,7 @@ export default function CreateSubscriptionPage() {
                   />
                 </div>
               </div>
-              <Button type="submit">Create recurring payment</Button>
+              <Button type="submit">Create subscription</Button>
             </form>
           </Form>
           <p className="pb-16 px-8 text-center text-sm text-muted-foreground">

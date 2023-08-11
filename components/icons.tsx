@@ -3,7 +3,7 @@ import {
   Moon,
   SunMedium,
   Twitter,
-  type Icon as LucideIcon,
+  type LucideIcon,
   Loader2,
   ChevronLeft,
   User,

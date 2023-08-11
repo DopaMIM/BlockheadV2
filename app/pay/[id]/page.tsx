@@ -3,6 +3,7 @@ import {createServerComponentClient} from "@supabase/auth-helpers-nextjs";
 import {cookies} from "next/headers";
 import {notFound} from "next/navigation";
 
+export const dynamic = 'force-dynamic'
 
 interface IPayPage {
   params: {

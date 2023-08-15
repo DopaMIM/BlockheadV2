@@ -5,10 +5,10 @@ import {
   USDT_ADDRESS,
   WBTC_ADDRESS,
   WETH_ADDRESS,
-  WMATIC_ADDRESS
-} from "@/constants";
-import {BigNumberish} from "@ethersproject/bignumber";
-import {formatUnits, parseUnits} from "@ethersproject/units";
+  WMATIC_ADDRESS,
+} from "@/constants"
+import { BigNumberish } from "@ethersproject/bignumber"
+import { formatUnits, parseUnits } from "@ethersproject/units"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -24,19 +24,19 @@ export function reformatContractFunctionResult(result: any) {
 }
 
 export function frequencyToSeconds(frequency: string) {
-  switch(frequency) {
-    case 'none':
+  switch (frequency) {
+    case "none":
       return 0
-    case 'daily':
-    case 'day':
+    case "daily":
+    case "day":
       return 86400
-    case 'weekly':
-    case 'week':
+    case "weekly":
+    case "week":
       return 604800
-    case 'monthly':
-    case 'month':
+    case "monthly":
+    case "month":
       return 2629800
-    case 'annual':
+    case "annual":
       return 31556952
   }
 }
@@ -47,52 +47,52 @@ export function paymentDueSecondsToDays(seconds: number) {
 
 export function getTokenName(tokenAddress: string) {
   if (tokenAddress === DAI_ADDRESS) {
-    return 'dai'
+    return "dai"
   }
   if (tokenAddress === USDC_ADDRESS) {
-    return 'usdc'
+    return "usdc"
   }
   if (tokenAddress === USDT_ADDRESS) {
-    return 'usdt'
+    return "usdt"
   }
   if (tokenAddress === WETH_ADDRESS) {
-    return 'weth'
+    return "weth"
   }
   if (tokenAddress === WBTC_ADDRESS) {
-    return 'wbtc'
+    return "wbtc"
   }
   if (tokenAddress === WMATIC_ADDRESS) {
-    return 'wmatic'
+    return "wmatic"
   }
   if (tokenAddress === SepoliaTokenContractAddress) {
-    return 'duh'
+    return "duh"
   }
-  return 'unknown'
+  return "unknown"
 }
 
 export function getTokenAddress(tokenName: string) {
-  if (tokenName === 'dai') {
+  if (tokenName === "dai") {
     return DAI_ADDRESS
   }
-  if (tokenName === 'usdc') {
+  if (tokenName === "usdc") {
     return USDC_ADDRESS
   }
-  if (tokenName === 'usdt') {
+  if (tokenName === "usdt") {
     return USDT_ADDRESS
   }
-  if (tokenName === 'weth') {
+  if (tokenName === "weth") {
     return WETH_ADDRESS
   }
-  if (tokenName === 'wbtc') {
+  if (tokenName === "wbtc") {
     return WBTC_ADDRESS
   }
-  if (tokenName === 'wmatic') {
+  if (tokenName === "wmatic") {
     return WMATIC_ADDRESS
   }
-  if (tokenName === 'duh') {
+  if (tokenName === "duh") {
     return SepoliaTokenContractAddress
   }
-  return 'unknown'
+  return "unknown"
 }
 
 // use contract.decimals() to get decimals...
@@ -123,7 +123,7 @@ export function formatAmount(amount: BigNumberish, tokenAddress: string) {
 }
 
 export function parseAmount(amount: BigNumberish, tokenAddress: string) {
-  if (typeof amount !== 'string') {
+  if (typeof amount !== "string") {
     amount = amount.toString()
   }
   if (tokenAddress === DAI_ADDRESS) {

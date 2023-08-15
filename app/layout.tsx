@@ -1,14 +1,13 @@
 import "@/styles/globals.css"
-import {UseDAppProvider} from "@/components/usedapp-provider";
-
 import { Metadata } from "next"
 
 import { siteConfig } from "@/config/site"
 import { fontSans } from "@/lib/fonts"
-import { Toaster } from "@/components/ui/toaster"
 import { cn } from "@/lib/utils"
+import { Toaster } from "@/components/ui/toaster"
 import { TailwindIndicator } from "@/components/tailwind-indicator"
 import { ThemeProvider } from "@/components/theme-provider"
+import { UseDAppProvider } from "@/components/usedapp-provider"
 
 export const metadata: Metadata = {
   title: {
@@ -42,12 +41,12 @@ export default function RootLayout({ children }: RootLayoutProps) {
             fontSans.variable
           )}
         >
-        <UseDAppProvider>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            {children}
-            <TailwindIndicator />
-            <Toaster />
-          </ThemeProvider>
+          <UseDAppProvider>
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+              {children}
+              <TailwindIndicator />
+              <Toaster />
+            </ThemeProvider>
           </UseDAppProvider>
         </body>
       </html>

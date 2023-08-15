@@ -1,15 +1,20 @@
-import {Icons} from "@/components/icons";
-import {Button} from "@/components/ui/button";
-import {useEthers} from "@usedapp/core";
-import React from "react";
+import React from "react"
+import { useEthers } from "@usedapp/core"
+
+import { Button } from "@/components/ui/button"
+import { Icons } from "@/components/icons"
 
 export const MetaMaskConnectButton = () => {
-  const {account, deactivate, activateBrowserWallet} = useEthers()
+  const { account, deactivate, activateBrowserWallet } = useEthers()
   // 'account' being undefined means that we are not connected.
   return (
     <div className="my-2">
       {account ? (
-        <Button variant="secondary" className="w-full" onClick={() => deactivate()}>
+        <Button
+          variant="secondary"
+          className="w-full"
+          onClick={() => deactivate()}
+        >
           <div className="flex items-center justify-around space-x-2">
             <span className="">Disconnect wallet</span>
             <Icons.metamask className="w-8 h-8" />

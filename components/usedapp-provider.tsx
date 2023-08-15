@@ -1,13 +1,19 @@
-"use client";
+"use client"
 
 import * as React from "react"
-import {type Config, DAppProvider, Polygon, LineaTestnet} from "@usedapp/core";
-import { providers } from "ethers";
-import {ALCHEMY_API_KEY, INFURA_API_KEY, SepoliaTestNetwork} from "@/constants";
+import {
+  ALCHEMY_API_KEY,
+  INFURA_API_KEY,
+  SepoliaTestNetwork,
+} from "@/constants"
+import { DAppProvider, LineaTestnet, Polygon, type Config } from "@usedapp/core"
+import { providers } from "ethers"
 
-const providerAlchemy = new providers.AlchemyProvider('sepolia', ALCHEMY_API_KEY);
+const providerAlchemy = new providers.AlchemyProvider("matic", ALCHEMY_API_KEY)
 providerAlchemy.pollingInterval = 3000
-const providerInfura = new providers.InfuraProvider('sepolia'/*, INFURA_API_KEY*/)
+const providerInfura = new providers.InfuraProvider(
+  "sepolia" /*, INFURA_API_KEY*/
+)
 providerInfura.pollingInterval = 3000
 const useDappConfig: Config = {
   readOnlyChainId: SepoliaTestNetwork.chainId, //Polygon.chainId,
@@ -18,10 +24,6 @@ const useDappConfig: Config = {
   },
 }
 
-export function UseDAppProvider({children}:{children: React.ReactNode}) {
-  return (
-    <DAppProvider config={useDappConfig}>
-      {children}
-    </DAppProvider>
-  )
+export function UseDAppProvider({ children }: { children: React.ReactNode }) {
+  return <DAppProvider config={useDappConfig}>{children}</DAppProvider>
 }

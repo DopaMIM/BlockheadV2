@@ -4,12 +4,12 @@ export const subscriptionSchema = z.object({
   logoUrl: z.string().url().optional().or(z.string().optional()),
   recipientName: z.string().min(3).max(100),
   productName: z.string().max(100).optional(),
-  receiverAddress: z.string().length(42).startsWith('0x'),
+  receiverAddress: z.string().length(42).startsWith("0x"),
   network: z.string().min(1).max(10),
   amount: z.coerce.number().min(0.01),
-  token: z.enum(['usdc', 'usdt', 'dai','duh']),
-  frequency: z.enum(['daily', 'weekly', 'monthly', 'yearly']),
-  trial: z.enum(['none', 'day', 'week', 'biweek', 'month']),
+  token: z.enum(["usdc", "usdt", "dai", "duh"]),
+  frequency: z.enum(["daily", "weekly", "monthly", "yearly"]),
+  trial: z.enum(["none", "day", "week", "biweek", "month"]),
 })
 
 export interface Subscription {
@@ -18,11 +18,11 @@ export interface Subscription {
     logoUrl?: string
     recipientName: string
     productName: string
-    receiverAddress: string,
-    network: string,
-    amount: number,
-    token: string,
-    frequency: string,
-    trial: string,
+    receiverAddress: string
+    network: string
+    amount: number
+    token: string
+    frequency: string
+    trial: string
   }
 }

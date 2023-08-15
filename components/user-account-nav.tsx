@@ -1,5 +1,12 @@
 "use client"
-import {MetaMaskConnectButton} from "@/components/metamask-connect-button";
+
+import React from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import {
+  User,
+  createClientComponentClient,
+} from "@supabase/auth-helpers-nextjs"
 
 import {
   DropdownMenu,
@@ -8,11 +15,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {UserAvatar} from "@/components/user-avatar"
-import {createClientComponentClient, User} from "@supabase/auth-helpers-nextjs";
-import Link from "next/link"
-import {useRouter} from "next/navigation";
-import React from "react";
+import { MetaMaskConnectButton } from "@/components/metamask-connect-button"
+import { UserAvatar } from "@/components/user-avatar"
 
 interface UserAccountNavProps extends React.HTMLAttributes<HTMLDivElement> {
   user: User | null
@@ -20,17 +24,14 @@ interface UserAccountNavProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function UserAccountNav({ user }: UserAccountNavProps) {
   const router = useRouter()
-  
+
   // Create a Supabase client configured to use cookies
   const supabase = createClientComponentClient()
-  
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
-        <UserAvatar
-          user={user}
-          className="h-8 w-8"
-        />
+        <UserAvatar user={user} className="h-8 w-8" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <div className="flex items-center justify-start gap-2 p-2">
@@ -41,7 +42,6 @@ export function UserAccountNav({ user }: UserAccountNavProps) {
                 {user?.email}
               </p>
             )}
-            
           </div>
         </div>
         <DropdownMenuSeparator />
@@ -61,7 +61,7 @@ export function UserAccountNav({ user }: UserAccountNavProps) {
             event.preventDefault()
             await supabase.auth.signOut()
             router.refresh()
-            router.push('/login')
+            router.push("/login")
           }}
         >
           Sign out

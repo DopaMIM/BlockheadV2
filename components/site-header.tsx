@@ -1,18 +1,18 @@
-import {UserAccountNav} from "@/components/user-account-nav";
-import {cn} from "@/lib/utils";
-import type {User} from "@supabase/auth-helpers-nextjs";
 import Link from "next/link"
+import type { User } from "@supabase/auth-helpers-nextjs"
 
 import { siteConfig } from "@/config/site"
+import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 import { Icons } from "@/components/icons"
 import { MainNav } from "@/components/main-nav"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { UserAccountNav } from "@/components/user-account-nav"
 
 interface SiteHeaderProps {
   user: User | null
 }
-export function SiteHeader({user}: SiteHeaderProps) {
+export function SiteHeader({ user }: SiteHeaderProps) {
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">
       <div className="container flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0">
@@ -23,7 +23,7 @@ export function SiteHeader({user}: SiteHeaderProps) {
             <nav>
               {user ? (
                 <UserAccountNav user={user} />
-                ) : (
+              ) : (
                 <Link
                   href="/login"
                   className={cn(

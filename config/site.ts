@@ -2,8 +2,7 @@ export type SiteConfig = typeof siteConfig
 
 export const siteConfig = {
   name: "Blockhead",
-  description:
-    "Self-Custody Recurring Payments",
+  description: "Self-Custody Recurring Payments",
   mainNav: [
     // {
     //   title: "Home",

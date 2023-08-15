@@ -1,5 +1,5 @@
-import {OutgoingSubscriptions} from "@/components/outgoing-subscriptions";
-import {Subscriptions} from "@/components/subscriptions";
+import { OutgoingSubscriptions } from "@/components/outgoing-subscriptions"
+import { Subscriptions } from "@/components/subscriptions"
 
 export default async function IndexPage() {
   return (

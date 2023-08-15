@@ -1,4 +1,7 @@
 "use client";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
+import {toast} from "@/components/ui/use-toast";
 import {useRecurringPaymentContract} from "@/lib/use-recurring-payment-contract";
 import {utils, Contract, BigNumber} from "ethers";
 import {Icons} from "@/components/icons";
@@ -23,16 +26,49 @@ import {Polygon, useEthers, useCall, useToken, useTokenAllowance, ERC20Interface
 import Link from "next/link";
 import {useState} from "react";
 
+function MetamaskInfo() {
+  const {account, chainId} = useEthers()
+  return (
+    <Card className="absolute top-0 right-0 m-4">
+  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+    <CardTitle className="text-sm font-medium grow">
+      <MetaMaskConnectButton />
+      <div className="flex items-center space-x-1">
+        <span className={`rounded-full h-2 w-2 ${account ? 'bg-green-600' : 'bg-red-600'}`}></span><span>{account ? '' : 'Not '}Connected</span>
+      </div>
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger>
+          <div className="text-2xl font-bold">{chainId || ''}</div>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Chain ID</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+    <p className="text-xs text-muted-foreground">
+      {account || 'Not connected'}
+    </p>
+  </CardContent>
+</Card>
+  )
+}
+
 interface ICreateRecurringPaymentForm {
   subscription: Subscription
 }
 export default function CreateRecurringPaymentForm({subscription}: ICreateRecurringPaymentForm) {
-  const {account, error, switchNetwork} = useEthers()
+  const {account, chainId, error, switchNetwork} = useEthers()
   const signer = useSigner()
   const [loading, setLoading] = useState(false)
+  const subscriptionChainId = parseInt(subscription.meta.network)
   
-  if (error?.name === 'ChainIdError') {
-    switchNetwork(SepoliaTestNetwork.chainId)
+  console.log('Metamask account, error, chainId', account, error, chainId)
+  if (subscriptionChainId !== chainId || error?.name === 'ChainIdError') {
+    switchNetwork(subscriptionChainId)
   }
   
   const subscriptionTokenAddress = getTokenAddress(subscription.meta.token)
@@ -40,18 +76,20 @@ export default function CreateRecurringPaymentForm({subscription}: ICreateRecurr
   console.log('amountInWei', amountInWei.toString())
   
   const recurringPaymentContract = useRecurringPaymentContract()
+  console.log('recurringPaymentContract', recurringPaymentContract)
   
   console.log('subscription', subscription, frequencyToSeconds(subscription.meta.frequency))
   const subscriptionToken = new Contract(subscriptionTokenAddress, ERC20Interface, signer)
   
   // check allowance for this subscription's token
   const allowance = useTokenAllowance(subscriptionTokenAddress, account, RECURRING_PAYMENT_CONTRACT)
-  console.log('allowance', allowance)
+  const hasAllowance = BigNumber.isBigNumber(allowance) && allowance.gt(0)
+  console.log('allowance, hasAllowance', allowance, hasAllowance)
   
   // if less than the subscription amount, show a message to approve the token
   async function approveToken() {
     setLoading(true)
-    if (!allowance && subscriptionToken) {
+    if (subscriptionToken) {
       await subscriptionToken.approve(RECURRING_PAYMENT_CONTRACT, parseAmount('10000000', subscriptionTokenAddress))
     }
     setLoading(false)
@@ -79,20 +117,27 @@ export default function CreateRecurringPaymentForm({subscription}: ICreateRecurr
     const {value, error} = await recurringPaymentContract.createRecurringPayment(
       ...functionArgs,
       // overrides
-      { gasLimit }
+      {gasLimit}
     )
     
     if (error) {
       console.error(error.message)
-      return
+      return toast({
+        title: "Something went wrong.",
+        description: "Your create recurring payment request failed. Please try again.",
+        variant: "destructive",
+      })
     }
-    console.log('value', value.toString())
-    
     setLoading(false)
+    return toast({
+      title: "Success!",
+      description: "You created a recurring payment.",
+    })
   }
   
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
+      <MetamaskInfo />
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 max-w-2xl">
         <div className="flex flex-col space-y-8 text-center">
           <div>
@@ -130,6 +175,9 @@ export default function CreateRecurringPaymentForm({subscription}: ICreateRecurr
                 <p className="text-sm font-medium text-muted-foreground">
                   {subscription.meta.token.toLocaleUpperCase()} billed {subscription.meta.frequency}
                 </p>
+                <div className="flex items-center justify-center space-x-1 text-sm font-medium text-muted-foreground">
+                  <Icons.link className="h-3 w-3" /><span>{subscription.meta.network}</span>
+                </div>
                 {subscription.meta?.trial !== 'none' && (
                   <p className="text-sm font-medium text-muted-foreground">
                     *first {subscription.meta?.trial} is free!
@@ -138,12 +186,10 @@ export default function CreateRecurringPaymentForm({subscription}: ICreateRecurr
               </div>
             </div>
           </div>
-          {!account ? (
-            <MetaMaskConnectButton />
-          ) : !BigNumber.isBigNumber(allowance) ? (
-            <Button variant="secondary" onClick={() => approveToken()}>Approve {subscription.meta.token.toLocaleUpperCase()}</Button>
+          {!hasAllowance ? (
+            <Button variant="secondary" disabled={!account} onClick={() => approveToken()}>Approve {subscription.meta.token.toLocaleUpperCase()}</Button>
           ) : (
-            <Button type="submit" onClick={() => approveSubscription()}>Subscribe</Button>
+            <Button type="submit" disabled={!account} onClick={() => approveSubscription()}>Subscribe</Button>
           )}
           <p className="pb-16 px-8 text-center text-sm text-muted-foreground">
             <Link href="/" className="hover:text-brand underline underline-offset-4">

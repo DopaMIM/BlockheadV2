@@ -22,7 +22,7 @@ export default async function LoggedInLayout({children}: LayoutProps) {
   return (
     <div className="relative flex min-h-screen flex-col">
       <SiteHeader user={user} />
-      <div className="flex-1">
+      <div className="flex-1 my-16">
         {children}
       </div>
     </div>

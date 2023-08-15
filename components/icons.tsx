@@ -7,7 +7,8 @@ import {
   Loader2,
   ChevronLeft,
   User,
-  Plus
+  Plus,
+  Link
 } from "lucide-react"
 
 export type Icon = LucideIcon
@@ -20,6 +21,7 @@ export const Icons = {
   chevronLeft: ChevronLeft,
   user: User,
   plus: Plus,
+  link: Link,
   metamask: (props: LucideProps) => (
     <svg version="1.1" id="Layer_1"
          xmlns="http://www.w3.org/2000/svg"

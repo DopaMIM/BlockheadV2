@@ -59,6 +59,32 @@ Customer at checkout at (your landing page URL)1. Connect Wallet
 4. Enjoy your product without ever giving custody of their tokens to a third party or paying another gas fee, while we automagically transfer the approved tokens at the approved intervals.
 
 #How to run the Blockhead Finance app locally
+1. cd into the blockhead-finance-app folder
+2. install pnmp globally
+"""
+$ npm i pnpm -g
+"""
+3. Install dependencies
+"""
+$pnpm i
+"""
+4. create a .env in the app folder and add supabase url and keys
+
+"""
+NEXT_PUBLIC_SUPABASE_URL="https://some.supabase.co/"
+NEXT_PUBLIC_SUPABASE_ANON_KEY= "your supa key here"
+"""
+Email Jason if you need our supabase key
+
+5. Run dev server
+"pnpm dev"
+
+6. When running locally the create user email redirect will not work, so sign in with the dummy credentials:
+
+email: test@test.com
+password: blockhead123 
+
+
 
 #How to run a Blockhead Automation Node (testNode):
 

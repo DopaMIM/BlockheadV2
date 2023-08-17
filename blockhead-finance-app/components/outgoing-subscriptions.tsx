@@ -64,7 +64,9 @@ function useRecurringPayments() {
         console.error(e)
       }
     }
-    inner()
+    if (chainId) {
+      inner()
+    }
   }, [chainId])
 
   // for (const subscription of data) {

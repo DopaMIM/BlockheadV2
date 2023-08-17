@@ -2,7 +2,6 @@ import { useEffect, useState } from "react"
 import { addressesByNetwork } from "@/constants"
 import { useSigner } from "@usedapp/core"
 import { Contract, utils } from "ethers"
-import _ from "lodash"
 
 import { recurringPaymentsABI } from "@/lib/recurring-payments-abi"
 
@@ -15,6 +14,7 @@ export function useRecurringPaymentContract(networkId: number) {
   )
   useEffect(() => {
     if (!signer || !networkId) {
+      setContract(undefined)
       return
     }
     setContract(

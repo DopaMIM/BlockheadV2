@@ -1,3 +1,6 @@
+"use client"
+
+import { useState } from "react"
 import { addressesByNetwork } from "@/constants"
 import { useEthers } from "@usedapp/core"
 
@@ -11,7 +14,12 @@ import {
 import { MetaMaskConnectButton } from "@/components/metamask-connect-button"
 
 export function MetamaskInfo({ classes = "" }) {
+  const [network, setNetwork] = useState("")
   const { account, chainId } = useEthers()
+  const networkName = addressesByNetwork[chainId || 0]?.name || ""
+  if (networkName && networkName !== network) {
+    setNetwork(networkName)
+  }
   return (
     <Card className={classes + " m-4"}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -31,9 +39,7 @@ export function MetamaskInfo({ classes = "" }) {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger>
-              <div className="text-2xl font-bold">
-                {addressesByNetwork[chainId || 0]?.name || ""}
-              </div>
+              <div className="text-2xl font-bold">{network}</div>
             </TooltipTrigger>
             <TooltipContent>
               <p>Network</p>

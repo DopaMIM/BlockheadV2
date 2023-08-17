@@ -1,5 +1,3 @@
-"use client"
-
 import { MetamaskInfo } from "@/components/metamask-info"
 import { OutgoingSubscriptions } from "@/components/outgoing-subscriptions"
 import { Subscriptions } from "@/components/subscriptions"

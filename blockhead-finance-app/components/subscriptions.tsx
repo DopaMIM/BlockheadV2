@@ -57,8 +57,10 @@ function useSubscriptionsPayments(subscriptions: any[]) {
         console.error(e)
       }
     }
-    inner()
-  }, [recurringPaymentContract, subscriptions])
+    if (chainId) {
+      inner()
+    }
+  }, [chainId, subscriptions])
 
   // for (const subscription of data) {
   //   subscription.payments = payments

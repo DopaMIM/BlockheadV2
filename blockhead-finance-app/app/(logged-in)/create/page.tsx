@@ -3,10 +3,16 @@
 import { useEffect } from "react"
 import Link from "next/link"
 import { redirect, useRouter } from "next/navigation"
-import { SepoliaTestNetwork } from "@/constants"
+import {
+  addressesByNetwork,
+  LineaMainChainId,
+  LineaTestChainId,
+  PolygonChainId,
+  SepoliaChainId,
+} from "@/constants"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
-import { Polygon, useEthers } from "@usedapp/core"
+import { useEthers } from "@usedapp/core"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 
@@ -37,6 +43,8 @@ import { Icons } from "@/components/icons"
 type FormData = z.infer<typeof subscriptionSchema>
 
 export default function CreateSubscriptionPage() {
+  const { account, chainId } = useEthers()
+  
   const form = useForm<FormData>({
     resolver: zodResolver(subscriptionSchema),
     defaultValues: {
@@ -44,14 +52,14 @@ export default function CreateSubscriptionPage() {
       recipientName: "",
       productName: undefined,
       receiverAddress: "",
-      network: "137",
+      network: (chainId || LineaMainChainId).toString(),
       amount: 0.01,
       token: "usdc",
       frequency: "monthly",
       trial: "none",
     },
   })
-  const { account } = useEthers()
+  
   const router = useRouter()
 
   useEffect(() => {
@@ -95,11 +103,11 @@ export default function CreateSubscriptionPage() {
   }
 
   return (
-    <div className="my-16 container flex h-screen w-screen flex-col items-center justify-center">
+    <div className="container flex flex-col items-center justify-center">
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 max-w-xl">
         <div className="flex flex-col space-y-2 text-center">
           <div className="flex space-x-2 justify-center">
-            <h1 className="mt-16 text-3xl font-bold leading-tight tracking-tighter md:text-5xl lg:leading-[1.1]">
+            <h1 className="mt-8 text-3xl font-bold leading-tight tracking-tighter md:text-5xl lg:leading-[1.1]">
               Create a Subscription
             </h1>
           </div>
@@ -189,16 +197,19 @@ export default function CreateSubscriptionPage() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value={Polygon.chainId.toString()}>
-                            {Polygon.chainName} ({Polygon.chainId})
+                          <SelectItem value={LineaMainChainId.toString()}>
+                            {addressesByNetwork[LineaMainChainId]?.name || ''} ({LineaMainChainId})
                           </SelectItem>
-                        </SelectContent>
-                        <SelectContent>
+                          <SelectItem value={LineaTestChainId.toString()}>
+                            {addressesByNetwork[LineaTestChainId]?.name || ''} ({LineaTestChainId})
+                          </SelectItem>
                           <SelectItem
-                            value={SepoliaTestNetwork.chainId.toString()}
+                            value={SepoliaChainId.toString()}
                           >
-                            {SepoliaTestNetwork.name} (
-                            {SepoliaTestNetwork.chainId})
+                            {addressesByNetwork[SepoliaChainId]?.name || ''} ({SepoliaChainId})
+                          </SelectItem>
+                          <SelectItem value={PolygonChainId.toString()}>
+                            {addressesByNetwork[PolygonChainId]?.name || ''} ({PolygonChainId})
                           </SelectItem>
                         </SelectContent>
                       </Select>
@@ -252,9 +263,6 @@ export default function CreateSubscriptionPage() {
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="usdc">USDC</SelectItem>
-                          <SelectItem value="usdt">USDT</SelectItem>
-                          <SelectItem value="dai">DAI</SelectItem>
-                          <SelectItem value="duh">DUH</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormDescription></FormDescription>

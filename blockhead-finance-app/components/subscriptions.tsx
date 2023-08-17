@@ -1,5 +1,6 @@
 "use client"
 
+import {addressesByNetwork} from "@/constants";
 import React, { useEffect, useState } from "react"
 import Link from "next/link"
 import { BigNumberish } from "@ethersproject/bignumber"
@@ -8,7 +9,7 @@ import { useEthers } from "@usedapp/core"
 import _ from "lodash"
 
 import { useRecurringPaymentContract } from "@/lib/use-recurring-payment-contract"
-import { cn, getTokenAddress, paymentDueSecondsToDays } from "@/lib/utils"
+import { cn, paymentDueSecondsToDays } from "@/lib/utils"
 import type { Subscription } from "@/lib/validations/subscription"
 import { Button, buttonVariants } from "@/components/ui/button"
 
@@ -19,8 +20,8 @@ function useSubscriptionsPayments(subscriptions: any[]) {
   const [recurringPayments, setRecurringPayments] = useState<
     Record<string, any>
   >({})
-  const { account } = useEthers()
-  const recurringPaymentContract = useRecurringPaymentContract()
+  const { account, chainId } = useEthers()
+  const recurringPaymentContract = useRecurringPaymentContract(chainId || 0)
 
   useEffect(() => {
     async function inner() {
@@ -67,6 +68,7 @@ function useSubscriptionsPayments(subscriptions: any[]) {
 }
 
 function useSubscriptions() {
+  const {chainId} = useEthers()
   const [loading, setLoading] = useState<boolean>(false)
   const [data, setData] = useState<any[]>([])
 
@@ -85,7 +87,8 @@ function useSubscriptions() {
           throw error
         }
         if (Array.isArray(data)) {
-          setData(data)
+          const filtered = data.filter((s) => s.meta.network == chainId)
+          setData(filtered)
         }
       } catch (e) {
         console.error(e)
@@ -93,17 +96,19 @@ function useSubscriptions() {
         setLoading(false)
       }
     }
-    inner()
-  }, [])
+    if (chainId) {
+      inner()
+    }
+  }, [chainId])
 
   return data
 }
 
 export const Subscriptions = () => {
   const subscriptions = useSubscriptions()
-  const { account } = useEthers()
+  const { chainId } = useEthers()
   const recurringPayments = useSubscriptionsPayments(subscriptions)
-  const recurringPaymentContract = useRecurringPaymentContract()
+  const recurringPaymentContract = useRecurringPaymentContract(chainId || 0)
 
   async function cancelRecurringPayment(accountNumber: BigNumberish) {
     if (!recurringPaymentContract) {
@@ -195,9 +200,7 @@ export const Subscriptions = () => {
                 trial,
               },
             }: Subscription) => {
-              const tokenAddress = getTokenAddress(token)
-              //const amountFormatted = BigNumber.from(amount)
-              //const amountToken = formatAmount(amount, token)
+              const tokenAddress = addressesByNetwork[parseInt(network)]?.[token]
               return (
                 <div key={id} className="grid grid-cols-8 gap-2">
                   <div className="">
@@ -206,7 +209,7 @@ export const Subscriptions = () => {
                     <div className="truncate">{receiverAddress}</div>
                   </div>
                   <div>{productName}</div>
-                  <div>{network}</div>
+                  <div>{addressesByNetwork[parseInt(network)]?.name || ''}</div>
                   <div className="truncate">{tokenAddress}</div>
                   <div className="truncate">
                     {amount} {token.toUpperCase()}

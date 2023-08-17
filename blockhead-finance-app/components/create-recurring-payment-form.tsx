@@ -1,101 +1,20 @@
 "use client"
 
-import { useState } from "react"
+import {Icons} from "@/components/icons"
+import {MetamaskInfo} from "@/components/metamask-info";
+import {Badge} from "@/components/ui/badge"
+import {Button} from "@/components/ui/button"
+import {toast} from "@/components/ui/use-toast"
+import {addressesByNetwork, UI_PARTNER_ADDRESS,} from "@/constants"
+
+import {useRecurringPaymentContract} from "@/lib/use-recurring-payment-contract"
+import {frequencyToSeconds} from "@/lib/utils"
+import type {Subscription} from "@/lib/validations/subscription"
+import {parseUnits} from "@ethersproject/units";
+import {ERC20Interface, useEthers, useSigner, useTokenAllowance,} from "@usedapp/core"
+import {BigNumber, Contract} from "ethers"
 import Link from "next/link"
-import {
-  LEVI_TEST_WALLET_ADDRESS,
-  RECURRING_PAYMENT_CONTRACT,
-  SepoliaTestNetwork,
-  UI_PARTNER_ADDRESS,
-} from "@/constants"
-import {
-  ERC20Interface,
-  Polygon,
-  useCall,
-  useEthers,
-  useSigner,
-  useToken,
-  useTokenAllowance,
-} from "@usedapp/core"
-import { BigNumber, Contract, utils } from "ethers"
-
-import { recurringPaymentsABI } from "@/lib/recurring-payments-abi"
-import { useRecurringPaymentContract } from "@/lib/use-recurring-payment-contract"
-import {
-  cn,
-  formatAmount,
-  frequencyToSeconds,
-  getTokenAddress,
-  parseAmount,
-} from "@/lib/utils"
-import type { Subscription } from "@/lib/validations/subscription"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Button, buttonVariants } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { toast } from "@/components/ui/use-toast"
-import { Icons } from "@/components/icons"
-import { MetaMaskConnectButton } from "@/components/metamask-connect-button"
-
-function MetamaskInfo() {
-  const { account, chainId } = useEthers()
-  return (
-    <Card className="absolute top-0 right-0 m-4">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium grow">
-          <MetaMaskConnectButton />
-          <div className="flex items-center space-x-1">
-            <span
-              className={`rounded-full h-2 w-2 ${
-                account ? "bg-green-600" : "bg-red-600"
-              }`}
-            ></span>
-            <span>{account ? "" : "Not "}Connected</span>
-          </div>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger>
-              <div className="text-2xl font-bold">{chainId || ""}</div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Chain ID</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        <p className="text-xs text-muted-foreground">
-          {account || "Not connected"}
-        </p>
-      </CardContent>
-    </Card>
-  )
-}
+import {useState} from "react"
 
 interface ICreateRecurringPaymentForm {
   subscription: Subscription
@@ -113,14 +32,14 @@ export default function CreateRecurringPaymentForm({
     switchNetwork(subscriptionChainId)
   }
 
-  const subscriptionTokenAddress = getTokenAddress(subscription.meta.token)
-  const amountInWei = parseAmount(
-    subscription.meta.amount,
-    subscriptionTokenAddress
+  const subscriptionTokenAddress = addressesByNetwork[subscriptionChainId]?.[subscription.meta.token] || ''
+  const amountInWei = parseUnits(
+    subscription.meta.amount.toString(),
+    6
   )
   console.log("amountInWei", amountInWei.toString())
 
-  const recurringPaymentContract = useRecurringPaymentContract()
+  const recurringPaymentContract = useRecurringPaymentContract(subscriptionChainId)
   console.log("recurringPaymentContract", recurringPaymentContract)
 
   console.log(
@@ -138,7 +57,7 @@ export default function CreateRecurringPaymentForm({
   const allowance = useTokenAllowance(
     subscriptionTokenAddress,
     account,
-    RECURRING_PAYMENT_CONTRACT
+    addressesByNetwork[subscriptionChainId]?.recurringPayments
   )
   const hasAllowance = BigNumber.isBigNumber(allowance) && allowance.gt(0)
   console.log("allowance, hasAllowance", allowance, hasAllowance)
@@ -148,8 +67,8 @@ export default function CreateRecurringPaymentForm({
     setLoading(true)
     if (subscriptionToken) {
       await subscriptionToken.approve(
-        RECURRING_PAYMENT_CONTRACT,
-        parseAmount("10000000", subscriptionTokenAddress)
+        addressesByNetwork[subscriptionChainId]?.recurringPayments,
+        parseUnits("10000000", 6)
       )
     }
     setLoading(false)
@@ -202,7 +121,7 @@ export default function CreateRecurringPaymentForm({
 
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
-      <MetamaskInfo />
+      <MetamaskInfo classes="absolute top-0 right-0"/>
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 max-w-2xl">
         <div className="flex flex-col space-y-8 text-center">
           <div>
@@ -249,7 +168,7 @@ export default function CreateRecurringPaymentForm({
                 </p>
                 <div className="flex items-center justify-center space-x-1 text-sm font-medium text-muted-foreground">
                   <Icons.link className="h-3 w-3" />
-                  <span>{subscription.meta.network}</span>
+                  <span><>{addressesByNetwork[parseInt(subscription.meta.network)]?.name || ''} {subscription.meta.network}</></span>
                 </div>
                 {subscription.meta?.trial !== "none" && (
                   <p className="text-sm font-medium text-muted-foreground">

@@ -18,7 +18,7 @@ export default async function PayPage({ params }: IPayPage) {
     .from("subscription")
     .select("*")
     .eq("id", params.id)
-    .single()
+    .maybeSingle()
 
   if (!subscription) {
     notFound()

@@ -1,48 +1,29 @@
 "use client"
 
+import {formatUnits} from "@ethersproject/units";
 import React, { useEffect, useState } from "react"
-import Link from "next/link"
-import { RECURRING_PAYMENT_CONTRACT } from "@/constants"
+import {addressesByNetwork} from "@/constants"
 import { BigNumberish } from "@ethersproject/bignumber"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
-import { useEthers, useSigner } from "@usedapp/core"
-import { BigNumber, Contract, utils } from "ethers"
+import { useEthers } from "@usedapp/core"
 import _ from "lodash"
 
-import { recurringPaymentsABI } from "@/lib/recurring-payments-abi"
 import { useRecurringPaymentContract } from "@/lib/use-recurring-payment-contract"
 import {
-  cn,
-  formatAmount,
-  getTokenAddress,
-  getTokenName,
   paymentDueSecondsToDays,
 } from "@/lib/utils"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 
 const supabase = createClientComponentClient()
 
 function useRecurringPayments() {
+  const {chainId, account} = useEthers()
   const [loaded, setLoaded] = useState<boolean>(false)
   const [recurringPayments, setRecurringPayments] = useState<
     Record<string, any>
   >({})
-
-  const { account } = useEthers()
-  const signer = useSigner()
-
-  let recurringPaymentContractInterface
-  let recurringPaymentContract: Contract | undefined = undefined
-  if (account && signer) {
-    recurringPaymentContractInterface = new utils.Interface(
-      recurringPaymentsABI
-    )
-    recurringPaymentContract = new Contract(
-      RECURRING_PAYMENT_CONTRACT,
-      recurringPaymentContractInterface,
-      signer
-    )
-  }
+  
+  let recurringPaymentContract = useRecurringPaymentContract(chainId || 0)
 
   useEffect(() => {
     async function inner() {
@@ -72,7 +53,7 @@ function useRecurringPayments() {
             .from("subscription")
             .select("*")
             .eq("id", subscriptionId)
-            .single()
+            .maybeSingle()
           if (error) {
             throw error
           }
@@ -86,7 +67,7 @@ function useRecurringPayments() {
       }
     }
     inner()
-  }, [recurringPaymentContract])
+  }, [chainId])
 
   // for (const subscription of data) {
   //   subscription.payments = payments
@@ -96,8 +77,9 @@ function useRecurringPayments() {
 }
 
 export const OutgoingSubscriptions = () => {
+  const { chainId } = useEthers()
   const recurringPayments = useRecurringPayments()
-  const recurringPaymentContract = useRecurringPaymentContract()
+  const recurringPaymentContract = useRecurringPaymentContract(chainId || 0)
 
   async function cancelRecurringPayment(accountNumber: BigNumberish) {
     if (!recurringPaymentContract) {
@@ -165,9 +147,6 @@ export const OutgoingSubscriptions = () => {
               cancelled,
               subscription,
             ]) => {
-              //const amountFormatted = BigNumber.from(amount)
-              //const amountToken = formatAmount(amount, token)
-
               return (
                 <div
                   key={accountNumber.toString()}
@@ -179,12 +158,13 @@ export const OutgoingSubscriptions = () => {
                     <div className="truncate">{recipientAddress}</div>
                   </div>
                   <div>{subscription?.meta?.productName}</div>
-                  <div>{subscription?.meta?.network}</div>
+                  <div>{addressesByNetwork[subscription?.meta?.network]?.name || ''}</div>
                   <div className="truncate">{token.toUpperCase()}</div>
                   <div className="truncate">
                     <>
-                      {formatAmount(amount, token)}{" "}
-                      {getTokenName(token).toUpperCase()}
+                      {/* use contract.decimals() to get decimals...*/}
+                      {formatUnits(amount, 6)}{" "}
+                      {(addressesByNetwork[chainId || 0]?.[token] || '').toUpperCase()}
                     </>
                   </div>
                   <div>{paymentDueSecondsToDays(paymentDue)} days</div>

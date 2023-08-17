@@ -2,25 +2,27 @@
 
 import * as React from "react"
 import {
-  ALCHEMY_API_KEY,
-  INFURA_API_KEY,
-  SepoliaTestNetwork,
+  ALCHEMY_API_KEY, INFURA_API_KEY, LineaMainChainId, LineaTestChainId, PolygonChainId, SepoliaChainId,
 } from "@/constants"
-import { DAppProvider, LineaTestnet, Polygon, type Config } from "@usedapp/core"
+import { DAppProvider, type Config } from "@usedapp/core"
 import { providers } from "ethers"
 
-const providerAlchemy = new providers.AlchemyProvider("matic", ALCHEMY_API_KEY)
-providerAlchemy.pollingInterval = 3000
-const providerInfura = new providers.InfuraProvider(
-  "sepolia" /*, INFURA_API_KEY*/
-)
-providerInfura.pollingInterval = 3000
+const providerPolygon = new providers.AlchemyProvider('matic', ALCHEMY_API_KEY)
+providerPolygon.pollingInterval = 3000
+const providerSepolia = new providers.JsonRpcProvider("https://sepolia.infura.io/v3/" + INFURA_API_KEY)
+providerSepolia.pollingInterval = 3000
+const providerLinea = new providers.JsonRpcProvider("https://linea-mainnet.infura.io/v3/" + INFURA_API_KEY)
+providerLinea.pollingInterval = 3000
+const providerLineaTestnet = new providers.JsonRpcProvider("https://linea-goerli.infura.io/v3/" + INFURA_API_KEY)
+providerLineaTestnet.pollingInterval = 3000
+
 const useDappConfig: Config = {
-  readOnlyChainId: SepoliaTestNetwork.chainId, //Polygon.chainId,
+  readOnlyChainId: LineaMainChainId,
   readOnlyUrls: {
-    [Polygon.chainId]: providerAlchemy,
-    [SepoliaTestNetwork.chainId]: providerInfura,
-    [LineaTestnet.chainId]: providerInfura,
+    [PolygonChainId]: providerPolygon,
+    [SepoliaChainId]: providerSepolia,
+    [LineaTestChainId]: providerLineaTestnet,
+    [LineaMainChainId]: providerLinea,
   },
 }
 

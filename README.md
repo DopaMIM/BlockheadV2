@@ -1,2 +1,4 @@
 # blockhead
-blockhead-automated-payments
+Blockhead Automation
+
+The Blockhead automation layer 

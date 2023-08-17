@@ -2,9 +2,9 @@
 
 The blockhead project contains two parts:
 
-The Blockhead Automation Layer for Linea is a smart contract layer that enables Linea builders to automate simple functions within their contracts. Builders simply include the Blockhead Automation Layer implementation into their smart contracts and a decentralized network of nodes will mange the automation.
+**The Blockhead Automation Layer for Linea** is a smart contract layer that enables Linea builders to automate simple functions within their contracts. Builders simply include the Blockhead Automation Layer implementation into their smart contracts and a decentralized network of nodes will mange the automation.
 
-Blockhead Finance is a fully self-custody subscription payment dapp. It is the first proof-of-concept app fully automated by the Blockhead Automation Layer.#How to create a subscription payment with Blockhead Finance.
+**Blockhead Finance** is a fully self-custody subscription payment dapp. It is the first proof-of-concept app fully automated by the Blockhead Automation Layer.#How to create a subscription payment with Blockhead Finance.
 
 # Powered by Consensys
 

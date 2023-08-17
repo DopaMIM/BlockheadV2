@@ -1,5 +1,5 @@
-export const ALCHEMY_API_KEY = "dZK6Z73kwwZWeJbol0U09SHT4WYTh8HH"
-export const INFURA_API_KEY = "ec53b32b3af04c2fb80d78f4cc008d23"
+//export const ALCHEMY_API_KEY = "dZK6Z73kwwZWeJbol0U09SHT4WYTh8HH"
+export const INFURA_API_KEY = "a590d8b1947a43fd900c17a3610d1f11"
 
 // transferBotNewest2
 //export const RECURRING_PAYMENT_CONTRACT = "0x32dF483898cDB30692C61BddEDbC24eAdcc5246B";
@@ -29,7 +29,30 @@ export const WETH_ADDRESS = "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619"
 // Wrapped MATIC
 export const WMATIC_ADDRESS = "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270"
 
-// Sepolia
+
+export const addressesByNetwork = {
+  // Polygon
+  137: {
+    usdc: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+    recurringPayments: "0x888A74ad7076Fae93147DC1e01146Ae9381e5B36"
+  },
+  // Sepolia
+  11155111: {
+    usdc: "0x6f14C02Fc1F78322cFd7d707aB90f18baD3B54f5",
+    recurringPayments: "0x350288deCD61DDf2D05954074475536cdA0d4405"
+  },
+  // Linea Testnet
+  59140: {
+    usdc: "0xf56dc6695cF1f5c364eDEbC7Dc7077ac9B586068",
+    recurringPayments: "0x27D15b36507cAF395D7Bb5607A0974c1dbE85c0e"
+  },
+  // Linea Mainnet
+  59144: {
+    usdc: "0x176211869cA2b568f2A7D4EE941E073a821EE1ff",
+    recurringPayments: "0x06a4a92ee08d44769fa67e85571a6c9a5a0299ca"
+  }
+}
+
 export const SepoliaTestNetwork = {
   name: "Sepolia Test Network",
   chainId: 11155111,

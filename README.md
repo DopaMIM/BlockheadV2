@@ -12,11 +12,18 @@ Blockhead Finance is a fully self-custody subscription payment dapp. It is the f
 
 Blockhead Automation Nodes rely heavily on infura WebSocket endpoints.  As their only function is to check every Automated function every 60 seconds to determine parameters have been met to call that function, and if true, call that function. The node Infura websocket implementation are all in the automationNodes folder. 
 
-Linea Websocket Endpoint -> lineaAutomationNode.jsLinea Goerli Websocket Endpoint  - > lineaGoerliAutomationNode.js & testNode.js
+Linea Websocket Endpoint
+https://github.com/DopaMIM/blockhead/blob/main/automationNodes/lineaAutomationNode.js
 
-Polygon Websocket Endpoint  ->  polygonAutomationNode.js
+Linea Goerli Websocket Endpoint
+https://github.com/DopaMIM/blockhead/blob/main/automationNodes/lineaGoerliAutomationNode.js
+https://github.com/DopaMIM/blockhead/blob/main/automationNodes/testNode.js
 
-Sepolia Websocket Endpoint -> sepoliaAutomationNode.js
+Polygon Websocket Endpoint
+https://github.com/DopaMIM/blockhead/blob/main/automationNodes/polygonAutomationNode.js
+
+Sepolia Websocket Endpoint
+https://github.com/DopaMIM/blockhead/blob/main/automationNodes/sepoliaAutomationNode.js
 
 The Blockhead Finance dapp utilized the RPC endpoints for each chain the dapp is deployed.
 
@@ -52,11 +59,10 @@ Merchants can set up subscription payments by visiting https://app.Blockhead.Fin
 
 4. Monitor your subscriptions on your merchant dashboard.
 
-Customer at checkout at (your landing page URL)1. Connect Wallet
-
+Customer at checkout at (your landing page URL)
+1. Connect Wallet
 2. Approve Token spend3. Approve recurring payment
-
-4. Enjoy your product without ever giving custody of their tokens to a third party or paying another gas fee, while we automagically transfer the approved tokens at the approved intervals.
+3. Enjoy your product without ever giving custody of their tokens to a third party or paying another gas fee, while we automagically transfer the approved tokens at the approved intervals.
 
 # How to run the Blockhead Finance app locally
 1. cd into the `blockhead-finance-app` folder

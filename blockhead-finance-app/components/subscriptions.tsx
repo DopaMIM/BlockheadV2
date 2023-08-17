@@ -1,8 +1,8 @@
 "use client"
 
-import {addressesByNetwork} from "@/constants";
 import React, { useEffect, useState } from "react"
 import Link from "next/link"
+import { addressesByNetwork } from "@/constants"
 import { BigNumberish } from "@ethersproject/bignumber"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { useEthers } from "@usedapp/core"
@@ -68,7 +68,7 @@ function useSubscriptionsPayments(subscriptions: any[]) {
 }
 
 function useSubscriptions() {
-  const {chainId} = useEthers()
+  const { chainId } = useEthers()
   const [loading, setLoading] = useState<boolean>(false)
   const [data, setData] = useState<any[]>([])
 
@@ -200,7 +200,8 @@ export const Subscriptions = () => {
                 trial,
               },
             }: Subscription) => {
-              const tokenAddress = addressesByNetwork[parseInt(network)]?.[token]
+              const tokenAddress =
+                addressesByNetwork[parseInt(network)]?.[token]
               return (
                 <div key={id} className="grid grid-cols-8 gap-2">
                   <div className="">
@@ -209,7 +210,7 @@ export const Subscriptions = () => {
                     <div className="truncate">{receiverAddress}</div>
                   </div>
                   <div>{productName}</div>
-                  <div>{addressesByNetwork[parseInt(network)]?.name || ''}</div>
+                  <div>{addressesByNetwork[parseInt(network)]?.name || ""}</div>
                   <div className="truncate">{tokenAddress}</div>
                   <div className="truncate">
                     {amount} {token.toUpperCase()}

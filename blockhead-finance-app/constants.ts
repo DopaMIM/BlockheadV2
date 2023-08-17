@@ -13,24 +13,24 @@ export const addressesByNetwork: Record<number, Record<string, string>> = {
   [PolygonChainId]: {
     usdc: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
     recurringPayments: "0x888A74ad7076Fae93147DC1e01146Ae9381e5B36",
-    name: "Polygon Mainnet"
+    name: "Polygon Mainnet",
   },
   //Sepolia
   [SepoliaChainId]: {
     usdc: "0x6f14C02Fc1F78322cFd7d707aB90f18baD3B54f5",
     recurringPayments: "0x350288deCD61DDf2D05954074475536cdA0d4405",
-    name: "Sepolia Test Network"
+    name: "Sepolia Test Network",
   },
   // Linea Testnet
   [LineaTestChainId]: {
     usdc: "0xf56dc6695cF1f5c364eDEbC7Dc7077ac9B586068",
     recurringPayments: "0x27D15b36507cAF395D7Bb5607A0974c1dbE85c0e",
-    name: "Linea Testnet"
+    name: "Linea Testnet",
   },
   // Linea Mainnet
   [LineaMainChainId]: {
     usdc: "0x176211869cA2b568f2A7D4EE941E073a821EE1ff",
     recurringPayments: "0x06a4a92ee08d44769fa67e85571a6c9a5a0299ca",
-    name: "Linea Mainnet"
-  }
+    name: "Linea Mainnet",
+  },
 }

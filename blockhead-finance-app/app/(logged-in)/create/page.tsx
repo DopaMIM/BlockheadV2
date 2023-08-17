@@ -4,11 +4,11 @@ import { useEffect } from "react"
 import Link from "next/link"
 import { redirect, useRouter } from "next/navigation"
 import {
-  addressesByNetwork,
   LineaMainChainId,
   LineaTestChainId,
   PolygonChainId,
   SepoliaChainId,
+  addressesByNetwork,
 } from "@/constants"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
@@ -44,7 +44,7 @@ type FormData = z.infer<typeof subscriptionSchema>
 
 export default function CreateSubscriptionPage() {
   const { account, chainId } = useEthers()
-  
+
   const form = useForm<FormData>({
     resolver: zodResolver(subscriptionSchema),
     defaultValues: {
@@ -59,7 +59,7 @@ export default function CreateSubscriptionPage() {
       trial: "none",
     },
   })
-  
+
   const router = useRouter()
 
   useEffect(() => {
@@ -198,18 +198,20 @@ export default function CreateSubscriptionPage() {
                         </FormControl>
                         <SelectContent>
                           <SelectItem value={LineaMainChainId.toString()}>
-                            {addressesByNetwork[LineaMainChainId]?.name || ''} ({LineaMainChainId})
+                            {addressesByNetwork[LineaMainChainId]?.name || ""} (
+                            {LineaMainChainId})
                           </SelectItem>
                           <SelectItem value={LineaTestChainId.toString()}>
-                            {addressesByNetwork[LineaTestChainId]?.name || ''} ({LineaTestChainId})
+                            {addressesByNetwork[LineaTestChainId]?.name || ""} (
+                            {LineaTestChainId})
                           </SelectItem>
-                          <SelectItem
-                            value={SepoliaChainId.toString()}
-                          >
-                            {addressesByNetwork[SepoliaChainId]?.name || ''} ({SepoliaChainId})
+                          <SelectItem value={SepoliaChainId.toString()}>
+                            {addressesByNetwork[SepoliaChainId]?.name || ""} (
+                            {SepoliaChainId})
                           </SelectItem>
                           <SelectItem value={PolygonChainId.toString()}>
-                            {addressesByNetwork[PolygonChainId]?.name || ''} ({PolygonChainId})
+                            {addressesByNetwork[PolygonChainId]?.name || ""} (
+                            {PolygonChainId})
                           </SelectItem>
                         </SelectContent>
                       </Select>

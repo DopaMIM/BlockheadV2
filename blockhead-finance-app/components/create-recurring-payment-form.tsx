@@ -1,20 +1,25 @@
 "use client"
 
-import {Icons} from "@/components/icons"
-import {MetamaskInfo} from "@/components/metamask-info";
-import {Badge} from "@/components/ui/badge"
-import {Button} from "@/components/ui/button"
-import {toast} from "@/components/ui/use-toast"
-import {addressesByNetwork, UI_PARTNER_ADDRESS,} from "@/constants"
-
-import {useRecurringPaymentContract} from "@/lib/use-recurring-payment-contract"
-import {frequencyToSeconds} from "@/lib/utils"
-import type {Subscription} from "@/lib/validations/subscription"
-import {parseUnits} from "@ethersproject/units";
-import {ERC20Interface, useEthers, useSigner, useTokenAllowance,} from "@usedapp/core"
-import {BigNumber, Contract} from "ethers"
+import { useState } from "react"
 import Link from "next/link"
-import {useState} from "react"
+import { UI_PARTNER_ADDRESS, addressesByNetwork } from "@/constants"
+import { parseUnits } from "@ethersproject/units"
+import {
+  ERC20Interface,
+  useEthers,
+  useSigner,
+  useTokenAllowance,
+} from "@usedapp/core"
+import { BigNumber, Contract } from "ethers"
+
+import { useRecurringPaymentContract } from "@/lib/use-recurring-payment-contract"
+import { frequencyToSeconds } from "@/lib/utils"
+import type { Subscription } from "@/lib/validations/subscription"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { toast } from "@/components/ui/use-toast"
+import { Icons } from "@/components/icons"
+import { MetamaskInfo } from "@/components/metamask-info"
 
 interface ICreateRecurringPaymentForm {
   subscription: Subscription
@@ -32,14 +37,13 @@ export default function CreateRecurringPaymentForm({
     switchNetwork(subscriptionChainId)
   }
 
-  const subscriptionTokenAddress = addressesByNetwork[subscriptionChainId]?.[subscription.meta.token] || ''
-  const amountInWei = parseUnits(
-    subscription.meta.amount.toString(),
-    6
-  )
+  const subscriptionTokenAddress =
+    addressesByNetwork[subscriptionChainId]?.[subscription.meta.token] || ""
+  const amountInWei = parseUnits(subscription.meta.amount.toString(), 6)
   console.log("amountInWei", amountInWei.toString())
 
-  const recurringPaymentContract = useRecurringPaymentContract(subscriptionChainId)
+  const recurringPaymentContract =
+    useRecurringPaymentContract(subscriptionChainId)
   console.log("recurringPaymentContract", recurringPaymentContract)
 
   console.log(
@@ -121,7 +125,7 @@ export default function CreateRecurringPaymentForm({
 
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
-      <MetamaskInfo classes="absolute top-0 right-0"/>
+      <MetamaskInfo classes="absolute top-0 right-0" />
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 max-w-2xl">
         <div className="flex flex-col space-y-8 text-center">
           <div>
@@ -168,7 +172,13 @@ export default function CreateRecurringPaymentForm({
                 </p>
                 <div className="flex items-center justify-center space-x-1 text-sm font-medium text-muted-foreground">
                   <Icons.link className="h-3 w-3" />
-                  <span><>{addressesByNetwork[parseInt(subscription.meta.network)]?.name || ''} {subscription.meta.network}</></span>
+                  <span>
+                    <>
+                      {addressesByNetwork[parseInt(subscription.meta.network)]
+                        ?.name || ""}{" "}
+                      {subscription.meta.network}
+                    </>
+                  </span>
                 </div>
                 {subscription.meta?.trial !== "none" && (
                   <p className="text-sm font-medium text-muted-foreground">

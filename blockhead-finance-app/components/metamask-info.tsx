@@ -1,13 +1,19 @@
-import {MetaMaskConnectButton} from "@/components/metamask-connect-button";
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
-import {addressesByNetwork} from "@/constants";
-import {useEthers} from "@usedapp/core";
+import { addressesByNetwork } from "@/constants"
+import { useEthers } from "@usedapp/core"
 
-export function MetamaskInfo({classes = ''}) {
-  const {account, chainId} = useEthers()
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { MetaMaskConnectButton } from "@/components/metamask-connect-button"
+
+export function MetamaskInfo({ classes = "" }) {
+  const { account, chainId } = useEthers()
   return (
-    <Card className={classes + ' m-4'}>
+    <Card className={classes + " m-4"}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium grow">
           <MetaMaskConnectButton />
@@ -25,7 +31,9 @@ export function MetamaskInfo({classes = ''}) {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger>
-              <div className="text-2xl font-bold">{addressesByNetwork[chainId || 0]?.name || ""}</div>
+              <div className="text-2xl font-bold">
+                {addressesByNetwork[chainId || 0]?.name || ""}
+              </div>
             </TooltipTrigger>
             <TooltipContent>
               <p>Network</p>

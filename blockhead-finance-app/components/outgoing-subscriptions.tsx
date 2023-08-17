@@ -1,28 +1,26 @@
 "use client"
 
-import {formatUnits} from "@ethersproject/units";
 import React, { useEffect, useState } from "react"
-import {addressesByNetwork} from "@/constants"
+import { addressesByNetwork } from "@/constants"
 import { BigNumberish } from "@ethersproject/bignumber"
+import { formatUnits } from "@ethersproject/units"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { useEthers } from "@usedapp/core"
 import _ from "lodash"
 
 import { useRecurringPaymentContract } from "@/lib/use-recurring-payment-contract"
-import {
-  paymentDueSecondsToDays,
-} from "@/lib/utils"
+import { paymentDueSecondsToDays } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
 const supabase = createClientComponentClient()
 
 function useRecurringPayments() {
-  const {chainId, account} = useEthers()
+  const { chainId, account } = useEthers()
   const [loaded, setLoaded] = useState<boolean>(false)
   const [recurringPayments, setRecurringPayments] = useState<
     Record<string, any>
   >({})
-  
+
   let recurringPaymentContract = useRecurringPaymentContract(chainId || 0)
 
   useEffect(() => {
@@ -158,13 +156,18 @@ export const OutgoingSubscriptions = () => {
                     <div className="truncate">{recipientAddress}</div>
                   </div>
                   <div>{subscription?.meta?.productName}</div>
-                  <div>{addressesByNetwork[subscription?.meta?.network]?.name || ''}</div>
+                  <div>
+                    {addressesByNetwork[subscription?.meta?.network]?.name ||
+                      ""}
+                  </div>
                   <div className="truncate">{token.toUpperCase()}</div>
                   <div className="truncate">
                     <>
                       {/* use contract.decimals() to get decimals...*/}
                       {formatUnits(amount, 6)}{" "}
-                      {(addressesByNetwork[chainId || 0]?.[token] || '').toUpperCase()}
+                      {(
+                        addressesByNetwork[chainId || 0]?.[token] || ""
+                      ).toUpperCase()}
                     </>
                   </div>
                   <div>{paymentDueSecondsToDays(paymentDue)} days</div>

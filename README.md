@@ -1,4 +1,4 @@
-#Blockhead Automation Layer for Linea
+# Blockhead Automation Layer for Linea
 
 The blockhead project contains two parts:
 
@@ -6,7 +6,7 @@ The Blockhead Automation Layer for Linea is a smart contract layer that enables 
 
 Blockhead Finance is a fully self-custody subscription payment dapp. It is the first proof-of-concept app fully automated by the Blockhead Automation Layer.#How to create a subscription payment with Blockhead Finance.
 
-#Powered by Consensys
+# Powered by Consensys
 
 Bounty 1: To Infura and Beyond
 
@@ -40,7 +40,7 @@ Bounty 5: Make a Dapp tha Slaps, No Cap
 
 It most definitely slaps
 
-#How to create a subscription payment with Blockhead Finance
+# How to create a subscription payment with Blockhead Finance
 
 Merchants can set up subscription payments by visiting https://app.Blockhead.Finance.
 
@@ -72,7 +72,7 @@ $pnpm i
 
 """
 NEXT_PUBLIC_SUPABASE_URL="https://some.supabase.co/"
-NEXT_PUBLIC_SUPABASE_ANON_KEY= "your supa key here"
+NEXT_PUBLIC_SUPABASE_ANON_KEY= "your supabase key here"
 """
 Email Jason if you need our supabase key
 
@@ -85,8 +85,9 @@ email: test@test.com
 password: blockhead123 
 
 
+# How to run the Blockhead Finance app locally
 
-#How to run a Blockhead Automation Node (testNode):
+# How to run a Blockhead Automation Node (testNode):
 
 1.  cd into the automationNodes folder and install ethers 5.6.1
 
@@ -112,7 +113,7 @@ $ npm install pm2 -g
 
 4. Make sure your wallet has sufficient LineaGoerliETH for submitting transactions, then start the node $pm2 start automationNodes/testNode.js
 
-#How to automate a contract with the Blockhead Automation Layer:
+# How to automate a contract with the Blockhead Automation Layer:
 
 https://docs.google.com/document/d/1vCk6s6jOHp6z3VvmnEzn8L8Bz0apo5aVvXI42nkWrp0/edit?usp=sharing
 

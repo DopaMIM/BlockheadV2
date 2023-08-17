@@ -1,0 +1,102 @@
+const { parseUnits } = require("ethers/lib/utils")
+
+working recurring payment contract on Polygon:
+ 0xf829aa0d0E77A459bC596C8D223bA56fbe450F19
+
+only increments 100 time Units.
+
+working
+0xc3ba39840d7fc18cfc43ebac02cdaae49afdbc8c = tested working
+
+6/16 5:43 newest.sol
+0xbc95321eb752a1062127e4e902cbebe6929561b1 = updated with interface payment, cancelation, freetrial, and index independent _timeIntervalSeconds
+
+6/15 8:50 newest2.sol
+0x5C6855C943d35130CE7180FAe3ee3E51c3b3D8A5 = updated with duh token modifiers, paymentDue, 
+0x32dF483898cDB30692C61BddEDbC24eAdcc5246B = fixed freetrial bug
+0xfF38e5af4C86CED747A5b8a6b89b0dDE6cAC7134 = 6/24/2023 aka newest3
+0xa5362cf8F89D6bae4c28B8a872545cA67C7aBF59 =  6/26/2023 aka newest4
+
+updated with cancel subscription and getsubscriptionstatus
+0xd6cCff753Cb99F55158A773025fD48c1066a1CDf
+
+tradingContract (possibly outdated)
+0x63450ef317D2EF46aebB5702553118998De459Cb 
+
+my addresses
+0x0C88f6733cF9d0f5C9f6Cd5aB83E9A382f9909cd //account 2
+0xeA9B8D8aD9668D0FdedE95333E816c36F2210fc0  //test account
+0xC1251AEAD615f83a67603690314BF3b367B1907f  //primary account
+0x6457d77316fB6C7F5b5bf37DDD03ED957D559EE5  //chrome account
+
+
+
+sequencer polygon 0x1712bFADd06B94Bc8dFb30F4d81AcF0919f7Db0B
+automationLayer 0xe8a12A7b1d803E2285d65Db1c3443CCC42ead896 //0x8016782EaaF14cF0e0c30112C5f1D212b2addf4F //0xe5d3e21880d632d56c386ff1325723b9eb10b346  //0x0C195c84e074592bb3d0721567bB177ffcfE1bd8
+
+PaymentLayer  0xD28879829C7a4cf7fCE2818d9b8e092b6F0a49Fb //0xBda8C7460b1a281eabFE51Ec6CC1D2dDE3D5D79E //0xd9145CCE52D386f254917e481eB44e9943F39138     //  0xCFf0a73919cC4351cdB06F6426F8d4279cbc8273
+
+
+trial paymentLayer "Automate" 0xD2a600A9301CD0bfDAb26F021c76b7b53516Abac
+
+
+
+8/3 deploy polygon
+sequencer: 0x702A1Fe16B6ff595E9E2AaAfa1e8e760Df88588C // 0xC16fDa968E931B2515Fefd46c4ca0b4C3211f4AD
+AutomationLayer:0xC9B06bad7576Bf52F0d6Db072013e7f0233A3dB3 //0x8a8efc06e3979fd2e7076f3cd94d07c617f50e3c //0x61255002e214457ffC271346eA5553D1b201e3a3 // 0x04C63F8BF254642676a27fC9558DAE7684019aC8   // 0x918249cA72623166af3298C14bEbB6D5F82aC09D
+PaymentLayer: 0x35388D03930bB74b51fBb356dF583761Ee54E7A3 // 0x7997B194Cc950799A2327A5cb8D42c485d458e97  /// 0xf536cE06c5145e4D4c15F7fc4DCB8190Ef875a6A  //   0x83a8775a5214D34DFa923509533AB5f88628c582   //0x18F7EAab0bA4BA0E53224Eaa13EF8fdafFDEea57
+
+
+
+1. deploy Node sequencer -  0xC16fDa968E931B2515Fefd46c4ca0b4C3211f4AD
+2. deploy automationLayer - 0xAD413AdfFF6cD2Cd1DF8c1B45C1A4Df273520368 //0xC9B06bad7576Bf52F0d6Db072013e7f0233A3dB3
+3. point automationLayer to sequencer
+4. deploy duh. - 0xAf65d42Beb8576E56190B1A1B960204003F7a916   // 0xD99713A0f7a7B046C1003330998B3FD48769cDd6
+5. create duh liqudity pool - 0x0e1953660311d0a53351af481132f3040f55b78cfa9a493aca7a403e2c83309b // 0x6d5d5bb3d88f329d8134be02383609b6a7b83bada106110c2ebbc19e60a6b816 tx hash
+6. deploy duh oracle - 0x6feFff1DCf82bf09e4754dC57089E6285ee86920 //0xD0215Aa24c6202466047CbdB63EcE87f4466569F
+7. point automationLayer and oracle at each other
+8. deploy payment PaymentLayer
+9. point payment layer to automation layer.
+10. Set _duhAddress on all contracts.
+11. fund paymentLayer and duhOracle with duh.
+12. set automationFee in duhOracle
+13. approve duh token spend on payment layer and oracle
+
+Polygon Addresses
+
+sequencer: 0x702A1Fe16B6ff595E9E2AaAfa1e8e760Df88588C
+AutomationLayer: 0x62f43fb9832e83cde2380327fad8d46e77ad0bc8
+DUH: 0xA4dABAa2DeDC043433A598e4cB1810842714A7d5
+PaymentLayer: 0x888A74ad7076Fae93147DC1e01146Ae9381e5B36
+batchProcessor: 0x42c6AA0e41Ded8cfcdF260bc3155f26d00FafC20
+
+
+sepolia testnet addresses
+
+sequencer: 0xa3417E64A0749073183E948d3d1b17317230Bc87
+AutomationLayer: 0x57216Cb79FA0B948d48d28Fb374Af3ca718E5705 // 0xa82E0b2954079Ae2C1D888842BE9259E5764879E
+PaymentLayer: 0x350288deCD61DDf2D05954074475536cdA0d4405 // 0xE20449D37d04Ff87A9142D740BfA0836B266285F
+Duh : 0xe981768F7eBeC7001c21DAC72C1BD986c1522580
+batchProcessor: 0x4a254804dc93f65453d21f8a4AbE7E52A4320782
+
+
+
+
+Linea Testnet Addresses
+
+sequencer: 0x06A4A92EE08d44769fa67e85571a6C9a5A0299CA 
+AutomationLayer: 0x346a834dFEeFc165C0307dbA320812Afea650a5C
+PaymentLayer: 0x27D15b36507cAF395D7Bb5607A0974c1dbE85c0e
+Duh : 0x5cb892fc4b6b99F6B11882A504a3b20fA6252e3B
+batchProcessor: 
+
+
+
+
+Linea Deploy addresses
+
+sequencer:  0x08399e90178e2E51e160394123C8301E27AFBe92
+AutomationLayer: 0xCa9A5C76e9c792c9106C9c1376521bAE52244790
+PaymentLayer: 0x06a4a92ee08d44769fa67e85571a6c9a5a0299ca
+Duh : 0x5cb892fc4b6b99F6B11882A504a3b20fA6252e3B
+batchProcessor:0x21bCd9863988EE6EE23EaF765b9E66bfA7D356F6

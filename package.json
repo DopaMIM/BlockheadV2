@@ -1,58 +1,82 @@
 {
-  "name": "polygon-box",
-  "version": "1.0.0",
-  "description": "A sample Truffle project that allows developers to deploy to the Polygon Matic PoS chain",
-  "main": "truffle-config.js",
-  "directories": {
-    "test": "test"
-  },
-  "scripts": {
-    "test": "truffle test",
-    "test:polygon": "truffle test --config=truffle-config.polygon.js --network=$npm_config_network",
-    "compile:polygon": "truffle compile --config=truffle-config.polygon.js",
-    "migrate:polygon": "truffle migrate --config=truffle-config.polygon.js --network=$npm_config_network",
-    "start": "pm2-runtime start ecosystem.config.js --env production"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/truffle-box/polygon-box.git"
-  },
-  "keywords": [
-    "Matic",
-    "Polygon",
-    "Ethereum",
-    "Truffle",
-    "dapp"
-  ],
-  "author": "Faina Shalts",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/truffle-box/polygon-box/issues"
-  },
-  "homepage": "https://github.com/truffle-box/polygon-box#readme",
-  "devDependencies": {
-    "@maticnetwork/maticjs": "^2.0.51",
-    "@truffle/hdwallet-provider": "^1.4.2",
-    "@types/node": "^17.0.41",
-    "dotenv": "^9.0.0",
-    "nodemon": "^2.0.16",
-    "ts-node": "^10.8.1",
-    "tslib": "^2.4.0",
-    "typescript": "^4.7.3"
-  },
-  "dependencies": {
-    "@ethersproject/experimental": "^5.6.2",
+    "name": "next-template",
+    "version": "0.0.2",
+    "private": true,
+    "scripts": {
+      "dev": "next dev",
+      "build": "next build",
+      "start": "next start",
+      "lint": "next lint",
+      "lint:fix": "next lint --fix",
+      "preview": "next build && next start",
+      "typecheck": "tsc --noEmit",
+      "format:write": "prettier --write \"**/*.{ts,tsx,mdx}\" --cache",
+      "format:check": "prettier --check \"**/*.{ts,tsx,mdx}\" --cache"
+    },
+    "dependencies": {
+      "@ethersproject/bignumber": "^5.7.0",
+      "@ethersproject/contracts": "^5.7.0",
+      "@ethersproject/units": "^5.7.0",
+      "@hookform/resolvers": "^3.1.1",
+      "@radix-ui/react-avatar": "^1.0.3",
+      "@radix-ui/react-dropdown-menu": "^2.0.5",
+      "@radix-ui/react-hover-card": "^1.0.6",
+      "@radix-ui/react-label": "^2.0.2",
+      "@radix-ui/react-radio-group": "^1.1.3",
+      "@radix-ui/react-select": "^1.2.2",
+      "@radix-ui/react-separator": "^1.0.3",
+      "@radix-ui/react-slot": "^1.0.2",
+      "@radix-ui/react-toast": "^1.1.4",
+      "@supabase/auth-helpers-nextjs": "^0.7.2",
+      "@supabase/supabase-js": "^2.26.0",
+      "@tanstack/react-table": "^8.9.3",
+      "@usedapp/coingecko": "^1.1.16",
+      "@usedapp/core": "^1.2.10",
+      "class-variance-authority": "^0.4.0",
+      "clsx": "^1.2.1",
+      "encoding": "^0.1.13",
+      "ethers": "^5.6.9",
+      "lodash": "^4.17.21",
+      "lucide-react": "0.105.0-alpha.4",
+      "next": "^13.4.12",
+      "next-themes": "^0.2.1",
+      "react": "^18.2.0",
+      "react-dom": "^18.2.0",
+      "react-hook-form": "^7.45.1",
+      "sharp": "^0.31.3",
+      "tailwind-merge": "^1.12.0",
+      "tailwindcss-animate": "^1.0.5",
+      "zod": "link:@hookform/resolvers/zod",
+      "@ethersproject/experimental": "^5.6.2",
     "@openzeppelin/contracts": "^4.6.0",
     "@uniswap/sdk": "^3.0.3",
     "@uniswap/v2-core": "^1.0.1",
     "@uniswap/v2-periphery": "^1.1.0-beta.0",
-    "ethers": "^5.7.2",
     "forever": "^4.0.3",
     "pm2": "^5.2.0",
     "web3": "^1.7.3",
     "yesno": "^0.4.0"
-  },
-  "engines": {
-    "node": "18.x"
+    },
+    "devDependencies": {
+      "@ianvs/prettier-plugin-sort-imports": "^3.7.2",
+      "@types/lodash": "^4.14.197",
+      "@types/node": "^17.0.45",
+      "@types/react": "^18.2.7",
+      "@types/react-dom": "^18.2.4",
+      "@typescript-eslint/parser": "^5.59.7",
+      "autoprefixer": "^10.4.14",
+      "eslint": "^8.41.0",
+      "eslint-config-next": "13.0.0",
+      "eslint-config-prettier": "^8.8.0",
+      "eslint-plugin-react": "^7.32.2",
+      "eslint-plugin-tailwindcss": "^3.12.0",
+      "postcss": "^8.4.24",
+      "prettier": "^2.8.8",
+      "tailwindcss": "^3.3.2",
+      "typescript": "^4.9.5"
+    },
+      "engines": {
+        "node": "18.x"
+      }
   }
-}
+  

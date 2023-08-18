@@ -1,5 +1,6 @@
 "use client"
 
+import {Contract} from "ethers";
 import React, { useEffect, useState } from "react"
 import Link from "next/link"
 import { addressesByNetwork } from "@/constants"
@@ -15,20 +16,25 @@ import { Button, buttonVariants } from "@/components/ui/button"
 
 const supabase = createClientComponentClient()
 
-function useSubscriptionsPayments(subscriptions: any[]) {
-  const [loaded, setLoaded] = useState<boolean>(false)
+function useSubscriptionsPayments(refresh: number, subscriptions: any[], account: string, chainId: number, recurringPaymentContract?: Contract) {
+  const [loaded, setLoaded] = useState<number>(-1)
   const [recurringPayments, setRecurringPayments] = useState<
     Record<string, any>
   >({})
-  const { account, chainId } = useEthers()
-  const recurringPaymentContract = useRecurringPaymentContract(chainId || 0)
+  
+  useEffect(() => {
+    setLoaded(-1)
+  }, [refresh])
 
   useEffect(() => {
     async function inner() {
       try {
-        if (!recurringPaymentContract || loaded) {
+        if (!recurringPaymentContract || loaded === chainId) {
           return
         }
+        console.log('incoming payments loading...')
+        setLoaded(chainId)
+        setRecurringPayments({})
         const currentBlockTimestamp =
           await recurringPaymentContract.getCurrentBlockTimestamp()
         // find all payments for each subscription - get all payments for this user's address
@@ -52,15 +58,12 @@ function useSubscriptionsPayments(subscriptions: any[]) {
             recurringPaymentArr
         }
         setRecurringPayments(recurringPayments)
-        setLoaded(true)
       } catch (e) {
         console.error(e)
       }
     }
-    if (chainId) {
-      inner()
-    }
-  }, [chainId, subscriptions])
+    inner()
+  }, [loaded, recurringPaymentContract, subscriptions])
 
   // for (const subscription of data) {
   //   subscription.payments = payments
@@ -69,18 +72,20 @@ function useSubscriptionsPayments(subscriptions: any[]) {
   return recurringPayments
 }
 
-function useSubscriptions() {
-  const { chainId } = useEthers()
-  const [loading, setLoading] = useState<boolean>(false)
+function useSubscriptions(chainId: number) {
+  const [loading, setLoading] = useState<number>(-1)
   const [data, setData] = useState<any[]>([])
 
   useEffect(() => {
     async function inner() {
       try {
+        if (loading === chainId) {
+          return
+        }
         const {
           data: { user },
         } = await supabase.auth.getUser()
-        setLoading(true)
+        setLoading(chainId)
         const { data, error } = await supabase
           .from("subscription")
           .select("*")
@@ -94,8 +99,6 @@ function useSubscriptions() {
         }
       } catch (e) {
         console.error(e)
-      } finally {
-        setLoading(false)
       }
     }
     if (chainId) {
@@ -106,11 +109,15 @@ function useSubscriptions() {
   return data
 }
 
-export const Subscriptions = () => {
-  const subscriptions = useSubscriptions()
-  const { chainId } = useEthers()
-  const recurringPayments = useSubscriptionsPayments(subscriptions)
-  const recurringPaymentContract = useRecurringPaymentContract(chainId || 0)
+interface IIncomingSubscriptions {
+  refresh: number
+  account: string
+  chainId: number
+  recurringPaymentContract?: Contract
+}
+export const IncomingSubscriptions = ({refresh, account, chainId, recurringPaymentContract}: IIncomingSubscriptions) => {
+  const subscriptions = useSubscriptions(chainId)
+  const recurringPayments = useSubscriptionsPayments(refresh, subscriptions, account, chainId, recurringPaymentContract)
 
   async function cancelRecurringPayment(accountNumber: BigNumberish) {
     if (!recurringPaymentContract) {

@@ -1,5 +1,6 @@
 "use client"
 
+import {Contract} from "ethers";
 import React, { useEffect, useState } from "react"
 import { addressesByNetwork } from "@/constants"
 import { BigNumberish } from "@ethersproject/bignumber"
@@ -8,28 +9,32 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { useEthers } from "@usedapp/core"
 import _ from "lodash"
 
-import { useRecurringPaymentContract } from "@/lib/use-recurring-payment-contract"
 import { paymentDueSecondsToDays } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
 const supabase = createClientComponentClient()
 
-function useRecurringPayments() {
-  const { chainId, account } = useEthers()
-  const [loaded, setLoaded] = useState<boolean>(false)
+function useRecurringPayments(refresh: number, chainId: number, recurringPaymentContract?: Contract) {
+  const [loaded, setLoaded] = useState<number>(-1)
   const [recurringPayments, setRecurringPayments] = useState<
     Record<string, any>
   >({})
 
-  let recurringPaymentContract = useRecurringPaymentContract(chainId || 0)
+  const { account} = useEthers()
+  
+  useEffect(() => {
+    setLoaded(-1)
+  }, [refresh])
 
   useEffect(() => {
     async function inner() {
       try {
-        if (loaded || !recurringPaymentContract) {
+        if (loaded === chainId || !recurringPaymentContract) {
           return
         }
-        setLoaded(true)
+        console.log('outgoing payments loading...')
+        setLoaded(chainId)
+        const recurringPaymentsLocal: Record<string, any> = {}
         setRecurringPayments({})
         const currentBlockTimestamp =
           await recurringPaymentContract.getCurrentBlockTimestamp()
@@ -55,19 +60,20 @@ function useRecurringPayments() {
           if (error) {
             throw error
           }
+          // if (!subscription || subscription.meta.network != chainId) {
+          //   continue
+          // }
           const recurringPaymentArr = [...recurringPayment, subscription]
           recurringPaymentArr[7] = paymentDue
-          recurringPayments[accountNumber.toString()] = recurringPaymentArr
+          recurringPaymentsLocal[accountNumber.toString()] = recurringPaymentArr
         }
-        setRecurringPayments(recurringPayments)
+        setRecurringPayments(recurringPaymentsLocal)
       } catch (e) {
         console.error(e)
       }
     }
-    if (chainId) {
-      inner()
-    }
-  }, [chainId])
+    inner()
+  }, [loaded, recurringPaymentContract])
 
   // for (const subscription of data) {
   //   subscription.payments = payments
@@ -76,11 +82,14 @@ function useRecurringPayments() {
   return recurringPayments
 }
 
-export const OutgoingSubscriptions = () => {
-  const { chainId } = useEthers()
-  const recurringPayments = useRecurringPayments()
-  const recurringPaymentContract = useRecurringPaymentContract(chainId || 0)
-
+interface IOutgoingSubscriptions {
+  refresh: number
+  chainId: number
+  recurringPaymentContract?: Contract
+}
+export const OutgoingSubscriptions = ({refresh, chainId = 0, recurringPaymentContract}: IOutgoingSubscriptions) => {
+  const recurringPayments = useRecurringPayments(refresh, chainId, recurringPaymentContract)
+  
   async function cancelRecurringPayment(accountNumber: BigNumberish) {
     if (!recurringPaymentContract) {
       return

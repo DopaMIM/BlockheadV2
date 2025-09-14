@@ -1,12 +1,13 @@
-import React from "react"
+import React, { useState } from "react"
 import { useEthers } from "@usedapp/core"
-
 import { Button } from "@/components/ui/button"
 import { Icons } from "@/components/icons"
+import { WalletChooser } from "@/components/wallet-chooser"
 
 export const MetaMaskConnectButton = () => {
-  const { account, deactivate, activateBrowserWallet } = useEthers()
-  // 'account' being undefined means that we are not connected.
+  const { account, deactivate } = useEthers()
+  const [showChooser, setShowChooser] = useState(false)
+
   return (
     <div className="my-2">
       {account ? (
@@ -16,17 +17,32 @@ export const MetaMaskConnectButton = () => {
           onClick={() => deactivate()}
         >
           <div className="flex items-center justify-around space-x-2">
-            <span className="">Disconnect wallet</span>
+            <span>Disconnect wallet</span>
             <Icons.metamask className="w-8 h-8" />
           </div>
         </Button>
       ) : (
-        <Button className="w-full" onClick={() => activateBrowserWallet()}>
-          <div className="flex items-center justify-around space-x-2">
-            <span className="">Connect wallet</span>
-            <Icons.metamask className="w-8 h-8" />
-          </div>
-        </Button>
+        <>
+          <Button
+            className="w-full"
+            onClick={() => setShowChooser((prev) => !prev)}
+          >
+            <div className="flex items-center justify-around space-x-2">
+              <span>Connect wallet</span>
+              <Icons.metamask className="w-8 h-8" />
+            </div>
+          </Button>
+
+          {showChooser && (
+            <WalletChooser
+              className="mt-2"
+              onConnected={() => {
+                console.log("connected")
+                setShowChooser(false) // hide chooser once connected
+              }}
+            />
+          )}
+        </>
       )}
     </div>
   )

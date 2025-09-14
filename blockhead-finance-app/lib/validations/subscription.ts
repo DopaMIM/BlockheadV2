@@ -7,7 +7,8 @@ export const subscriptionSchema = z.object({
   receiverAddress: z.string().length(42).startsWith("0x"),
   network: z.string().min(1).max(10),
   amount: z.coerce.number().min(0.01),
-  token: z.enum(["usdc"]),
+ // token: z.enum(["usdc"]),
+  token: z.string().min(1),
   frequency: z.enum(["daily", "weekly", "monthly", "yearly"]),
   trial: z.enum(["none", "day", "week", "biweek", "month"]),
 })

@@ -4,60 +4,32 @@ export const INFURA_API_KEY = "a590d8b1947a43fd900c17a3610d1f11"
 export const UI_PARTNER_ADDRESS = "0x6457d77316fB6C7F5b5bf37DDD03ED957D559EE5" //LEVI_TEST_WALLET_ADDRESS
 
 export const PolygonChainId = 137
-export const SepoliaChainId = 11155111
-export const LineaTestChainId = 59140
-export const LineaMainChainId = 59144
+//export const SepoliaChainId = 11155111
+//export const LineaTestChainId = 59140
+//export const LineaMainChainId = 59144
 export const EthereumMainnetChainId = 1
 export const BscChainId = 56
 export const ArbitrumChainId = 42161
 export const OptimismChainId = 10
-export const AvalancheChainId = 43114
-export const FantomChainId = 250
+//export const AvalancheChainId = 43114
+//export const FantomChainId = 250
 export const BaseChainId = 8453
-export const ZkSyncEraChainId = 324
+//export const ZkSyncEraChainId = 324
 
 // constants.ts
 
-// each inner object must be Record<string, number>
-/*
-export const tokenDecimalsByNetwork: Record<number, Record<string, number>> = {
-  137: {
-    usdc: 6,
-    usdt: 6,
-    dai: 18,
-    weth: 18,
-    wmatic: 18,
-  },
-  59144: {
-    // Linea tokens (fill in real values later)
-    usdc: 6,
-    usdt: 6,
-    dai: 18,
-    weth: 18,
-    wmatic: 18,
-  },
-  11155111: {
-    // Sepolia test tokens (fill in real values later)
-    usdc: 6,
-    usdt: 6,
-    dai: 18,
-    weth: 18,
-    wmatic: 18,
-  },
-};
 
-*/
 export const tokenDecimalsByNetwork: Record<number, Record<string, number>> = {
   [EthereumMainnetChainId]: { usdc: 6, usdt: 6, dai: 18, tusd: 18, usdp: 18 },
   [BscChainId]: { busd: 18, usdt: 6, usdc: 6, dai: 18, tusd: 18 },
   [PolygonChainId]: { usdc: 6, usdt: 6, dai: 18, frax: 18, tusd: 18 },
   [ArbitrumChainId]: { usdc: 6, usdt: 6, dai: 18, frax: 18, tusd: 18 },
-  [OptimismChainId]: { usdc: 6, usdt: 6, dai: 18, susd: 18, frax: 18 },
-  [AvalancheChainId]: { usdc: 6, usdt: 6, dai: 18, frax: 18, usdce: 6 },
+  [OptimismChainId]: { usdc: 6, usdt: 6, dai: 18, susd: 18, frax: 18, usdc_e: 6 },
+  //[AvalancheChainId]: { usdc: 6, usdt: 6, dai: 18, frax: 18, usdce: 6 },
   [BaseChainId]: { usdc: 6, usdt: 6, dai: 18, frax: 18 },
-  [LineaMainChainId]: { usdc: 6, usdt: 6, dai: 18 },
-  [ZkSyncEraChainId]: { usdc: 6, usdce: 6, usdt: 6, dai: 18, frax: 18 },
-  [SepoliaChainId]: { usdc: 6 }, // just your test token
+  //[LineaMainChainId]: { usdc: 6, usdt: 6, dai: 18 },
+  //[ZkSyncEraChainId]: { usdc: 6, usdce: 6, usdt: 6, dai: 18, frax: 18 },
+  //[SepoliaChainId]: { usdc: 6 }, // just your test token
 }
 
 export const addressesByNetwork: Record<number, Record<string, string>> = {
@@ -87,33 +59,48 @@ export const addressesByNetwork: Record<number, Record<string, string>> = {
     usdc: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174", // USDC (bridged) (6)
     usdt: "0xc2132D05D31c914a87C6611C10748AEb04B58e8F", // USDT (6)
     dai: "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063", // DAI (18)
-    frax: "0x45c32fA6DF82eaD1e2eF74d17b76547EDdFaFF89", // FRAX (18)
-    tusd: "0x2e1ad108ff1d8c782fcbbb89aad783ac49586756", // TUSD (18)
+   // frax: "0x45c32fA6DF82eaD1e2eF74d17b76547EDdFaFF89", // FRAX (18)
+   // tusd: "0x2e1ad108ff1d8c782fcbbb89aad783ac49586756", // TUSD (18)
     recurringPayments: "0xD273Bfc6C210a50bD0900F5271564B907F391D03",
     name: "Polygon Mainnet",
   }, // DAI: :contentReference[oaicite:9]{index=9} FRAX: :contentReference[oaicite:10]{index=10}
 
-  // 4) Arbitrum One
-  [ArbitrumChainId]: {
-    usdc: "0xAf88d065E77C8CC2239327C5EDb3A432268e5831", // Native USDC (6)
-    usdt: "0xfd086BC7CD5C481DCC9C85ebe478A1C0b69FCBb9", // USDT (6)
-    dai: "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1", // DAI (18)
-    frax: "0x17FC002b466eEc40DaE837Fc4bE5c67993ddBd6F", // FRAX (18)
-    tusd: "0x0000000000085d4780B73119b644AE5ecd22b376", // TUSD bridged (if needed)
-    recurringPayments: "0xREPLACE_ME",
-    name: "Arbitrum One",
-  }, // USDC: :contentReference[oaicite:11]{index=11} USDT: :contentReference[oaicite:12]{index=12} DAI: :contentReference[oaicite:13]{index=13} FRAX: :contentReference[oaicite:14]{index=14}
+ // USDC: :contentReference[oaicite:11]{index=11} USDT: :contentReference[oaicite:12]{index=12} DAI: :contentReference[oaicite:13]{index=13} FRAX: :contentReference[oaicite:14]{index=14}
 
   // 5) Optimism (OP Mainnet)
   [OptimismChainId]: {
-    usdc: "0x0b2C639c533813f4Aa9D7837CaF62653d097ff85", // Native USDC (6)
+    usdc: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85", // Native USDC (6)
+    //usdc_e: "0x7F5c764cBc14f9669B88837ca1490cCa17c31607", // bridged USDC (6)
     usdt: "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58", // USDT (6)
     dai: "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1", // DAI (18)
-    susd: "0x8c6f28f2F1A3C87F0f938B96d27520d9751EC8d9", // sUSD (18)
-    frax: "0x2e3d870790dc77a83dd1d18184acc7439a53f475", // FRAX (18)
-    recurringPayments: "0xREPLACE_ME",
+    //susd: "0x8c6f28f2F1A3C87F0f938B96d27520d9751EC8d9", // sUSD (18)
+    //frax: "0x2e3d870790dc77a83dd1d18184acc7439a53f475", // FRAX (18)
+    recurringPayments: "0x60375d0aDA5225845fcC12945F8Fd86144E6F413",
     name: "Optimism",
   }, // USDC: :contentReference[oaicite:15]{index=15} USDT: :contentReference[oaicite:16]{index=16} DAI: :contentReference[oaicite:17]{index=17} sUSD: :contentReference[oaicite:18]{index=18} FRAX: :contentReference[oaicite:19]{index=19}
+ 
+  // 8) Base
+  [BaseChainId]: {
+    usdc: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", // Native USDC (6)
+    usdt: "0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2", // USDT (6)
+    //dai: "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb", // DAI (18)
+    //frax: "0x909DBdE1eBE906Af95660033e478D59EFe831fED", // FRAX (18)
+    //usdbc: "0xA0b... (deprecated bridged USDC.e; avoid new use)",
+    recurringPayments: "0xe14cf9Fe285e726F5D78490beC58Ed49D6C8B057",
+    name: "Base",
+  }, // USDC: :contentReference[oaicite:27]{index=27} USDT: :contentReference[oaicite:28]{index=28} DAI: :contentReference[oaicite:29]{index=29} FRAX: :contentReference[oaicite:30]{index=30}
+  // 4) Arbitrum One
+  [ArbitrumChainId]: {
+    usdc: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831", // Native USDC (6)
+    usdt: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9", // USDT (6)
+    //dai: "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1", // DAI (18)
+    //frax: "0x17FC002b466eEc40DaE837Fc4bE5c67993ddBd6F", // FRAX (18)
+    //tusd: "0x0000000000085d4780B73119b644AE5ecd22b376", // TUSD bridged (if needed)
+    recurringPayments: "0xe14cf9Fe285e726F5D78490beC58Ed49D6C8B057",
+    name: "Arbitrum One",
+  },
+ 
+  /*
 
   // 6) Avalanche C-Chain
   [AvalancheChainId]: {
@@ -138,17 +125,7 @@ export const addressesByNetwork: Record<number, Record<string, string>> = {
   }, // USDC (bridged): :contentReference[oaicite:24]{index=24} USDT (fUSDT): :contentReference[oaicite:25]{index=25} USDC.e (Wormhole): :contentReference[oaicite:26]{index=26}
   // (DAI address is common knowledge on FTM; verify in explorer before prod)
 
-  // 8) Base
-  [BaseChainId]: {
-    usdc: "0x833589fCD6eDb6E08f4c7C32D4f71B54bDA02913", // Native USDC (6)
-    usdt: "0x2d1aDB45Bb1d7D2556c6558aDb76CFD4F9F4ed16", // USDT (6)
-    dai: "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb", // DAI (18)
-    frax: "0x909DBdE1eBE906Af95660033e478D59EFe831fED", // FRAX (18)
-    usdbc: "0xA0b... (deprecated bridged USDC.e; avoid new use)",
-    recurringPayments: "0xREPLACE_ME",
-    name: "Base",
-  }, // USDC: :contentReference[oaicite:27]{index=27} USDT: :contentReference[oaicite:28]{index=28} DAI: :contentReference[oaicite:29]{index=29} FRAX: :contentReference[oaicite:30]{index=30}
-
+ 
   // 9) Linea Mainnet
   [LineaMainChainId]: {
     usdc: "0x176211869cA2b568f2A7D4EE941E073a821EE1ff", // USDC (6)
@@ -169,38 +146,6 @@ export const addressesByNetwork: Record<number, Record<string, string>> = {
     recurringPayments: "0xREPLACE_ME",
     name: "zkSync Era",
   }, // Native USDC + USDC.e background: :contentReference[oaicite:34]{index=34}
+
+*/
 }
-/*
-  // Polygon
-  [PolygonChainId]: {
-    usdc: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
-    usdt:  "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
-    dai:   "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063",
-    recurringPayments: "0x888A74ad7076Fae93147DC1e01146Ae9381e5B36",
-    name: "Polygon Mainnet",
-  },
-  //Sepolia
-  [SepoliaChainId]: {
-    usdc: "0x6f14C02Fc1F78322cFd7d707aB90f18baD3B54f5",
-    recurringPayments: "0x350288deCD61DDf2D05954074475536cdA0d4405",
-    name: "Sepolia Test Network",
-  },
-  // Linea Testnet
-  [LineaTestChainId]: {
-    usdc: "0xf56dc6695cF1f5c364eDEbC7Dc7077ac9B586068",
-    recurringPayments: "0x27D15b36507cAF395D7Bb5607A0974c1dbE85c0e",
-    name: "Linea Testnet",
-  },
-  // Linea Mainnet
-  [LineaMainChainId]: {
-    usdc: "0x176211869cA2b568f2A7D4EE941E073a821EE1ff",
-    recurringPayments: "0x06a4a92ee08d44769fa67e85571a6c9a5a0299ca",
-    name: "Linea Mainnet",
-  },
-    // Optimism Mainnet
-    [OptimismChainId]: {
-      usdc: "0x176211869cA2b568f2A7D4EE941E073a821EE1ff",
-      recurringPayments: "0x06a4a92ee08d44769fa67e85571a6c9a5a0299ca",
-      name: "Optimism Mainnet",
-    },
-  */

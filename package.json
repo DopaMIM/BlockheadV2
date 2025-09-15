@@ -7,6 +7,17 @@
   },
   "dependencies": {
     "dotenv": "^17.2.2",
+    "ethers": "^5.8.0",
     "hardhat": "^3.0.6"
-  }
+  },
+  "name": "blockhead",
+  "version": "1.0.0",
+  "description": "The blockhead project contains two parts:",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

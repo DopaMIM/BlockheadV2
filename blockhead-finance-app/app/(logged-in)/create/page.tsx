@@ -4,17 +4,17 @@ import { useEffect, useMemo } from "react"
 import Link from "next/link"
 import { redirect, useRouter } from "next/navigation"
 import {
-  LineaMainChainId,
+  ArbitrumChainId,
+  //AvalancheChainId,
+  BaseChainId,
+  //BscChainId,
+  //EthereumMainnetChainId,
+  //LineaMainChainId,
+  OptimismChainId,
   PolygonChainId,
+  //ZkSyncEraChainId,
   addressesByNetwork,
   tokenDecimalsByNetwork,
-  EthereumMainnetChainId,
-  BscChainId,
-  ArbitrumChainId,
-  OptimismChainId,
-  AvalancheChainId,
-  BaseChainId,
-  ZkSyncEraChainId,
 } from "@/constants"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
@@ -48,49 +48,49 @@ import { Icons } from "@/components/icons"
 
 // Mainnets (and testnets you want available). Order as you like.
 const SUPPORTED_CHAIN_IDS: number[] = [
-  EthereumMainnetChainId,
-  BscChainId,
+  //EthereumMainnetChainId,
+  //BscChainId,
   PolygonChainId,
   ArbitrumChainId,
   OptimismChainId,
-  AvalancheChainId,
-  BaseChainId,
-  LineaMainChainId,
-  ZkSyncEraChainId,
- // SepoliaChainId,      // testnet
+  //AvalancheChainId,
+ BaseChainId,
+ // LineaMainChainId,
+ // ZkSyncEraChainId,
+  // SepoliaChainId,      // testnet
   //LineaTestChainId,    // testnet
 ]
 
 // nice display fallback if `name` isn’t set yet
 function chainLabel(chainId: number) {
-  return `${addressesByNetwork[chainId]?.name ?? `Chain ${chainId}`} (${chainId})`
+  return `${
+    addressesByNetwork[chainId]?.name ?? `Chain ${chainId}`
+  } (${chainId})`
 }
-
-
 
 type FormData = z.infer<typeof subscriptionSchema>
 
 /** Build token options from constants for a given chainId. */
 function getTokenOptionsForChain(chainId: number) {
-  const addrMap = (addressesByNetwork && addressesByNetwork[chainId]) || {};
-  const decMap  = (tokenDecimalsByNetwork && tokenDecimalsByNetwork[chainId]) || {};
-  const SKIP = new Set(["recurringPayments", "name"]); // non-token keys
+  const addrMap = (addressesByNetwork && addressesByNetwork[chainId]) || {}
+  const decMap =
+    (tokenDecimalsByNetwork && tokenDecimalsByNetwork[chainId]) || {}
+  const SKIP = new Set(["recurringPayments", "name"]) // non-token keys
 
   return Object.keys(addrMap)
     .filter((k) => !SKIP.has(k))
     .map((k) => {
-      const addr = addrMap[k] as `0x${string}`;
-      const dec  = typeof decMap[k] === "number" ? decMap[k] : 18;
+      const addr = addrMap[k] as `0x${string}`
+      const dec = typeof decMap[k] === "number" ? decMap[k] : 18
       return {
         key: k,
         symbol: k.toUpperCase(),
         address: addr,
         decimals: dec,
         label: `${k.toUpperCase()} — ${addr.slice(0, 6)}…${addr.slice(-4)}`,
-      };
-    });
+      }
+    })
 }
-
 
 export default function CreateSubscriptionPage() {
   const { account, chainId } = useEthers()
@@ -102,7 +102,7 @@ export default function CreateSubscriptionPage() {
       recipientName: "",
       productName: undefined,
       receiverAddress: "",
-      network: (chainId || LineaMainChainId).toString(),
+      network: (chainId || OptimismChainId).toString(),
       amount: 0.01,
       token: "usdc", // default token key (lowercase)
       frequency: "monthly",
@@ -119,7 +119,10 @@ export default function CreateSubscriptionPage() {
 
   // Derive token options from currently selected network
   const networkId = Number(form.watch("network"))
-  const tokenOptions = useMemo(() => getTokenOptionsForChain(networkId), [networkId])
+  const tokenOptions = useMemo(
+    () => getTokenOptionsForChain(networkId),
+    [networkId]
+  )
 
   // Ensure the token value is valid whenever network changes
   useEffect(() => {
@@ -145,10 +148,12 @@ export default function CreateSubscriptionPage() {
           // normalize token key to lowercase just in case
           token: (data.token || "").toLowerCase(),
           // (optional) persist resolved address/decimals for exactness on checkout:
-          tokenAddress:
-            tokenOptions.find((t) => t.key === (data.token || "").toLowerCase())?.address,
-          tokenDecimals:
-            tokenOptions.find((t) => t.key === (data.token || "").toLowerCase())?.decimals,
+          tokenAddress: tokenOptions.find(
+            (t) => t.key === (data.token || "").toLowerCase()
+          )?.address,
+          tokenDecimals: tokenOptions.find(
+            (t) => t.key === (data.token || "").toLowerCase()
+          )?.decimals,
         },
         user_id: user?.id,
       })
@@ -187,15 +192,6 @@ export default function CreateSubscriptionPage() {
             })}
             className="grid gap-6"
           >
-            <div className="grid gap-6">
-              <Avatar className="mx-auto w-24 h-24">
-                <AvatarImage src="" />
-                <AvatarFallback>
-                  <Icons.plus className="w-4 h-4" />
-                  Add Logo
-                </AvatarFallback>
-              </Avatar>
-            </div>
 
             <div className="grid gap-1">
               <FormField
@@ -256,20 +252,22 @@ export default function CreateSubscriptionPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Network</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-  {SUPPORTED_CHAIN_IDS.map((id) => (
-    <SelectItem key={id} value={id.toString()}>
-      {chainLabel(id)}
-    </SelectItem>
-  ))}
-</SelectContent>
-
+                          {SUPPORTED_CHAIN_IDS.map((id) => (
+                            <SelectItem key={id} value={id.toString()}>
+                              {chainLabel(id)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
                       </Select>
                       <FormDescription></FormDescription>
                       <FormMessage />
@@ -290,7 +288,12 @@ export default function CreateSubscriptionPage() {
                     <FormItem>
                       <FormLabel>Price</FormLabel>
                       <FormControl>
-                        <Input type="number" step={0.01} placeholder="" {...field} />
+                        <Input
+                          type="number"
+                          step={0.01}
+                          placeholder=""
+                          {...field}
+                        />
                       </FormControl>
                       <FormDescription>Minimum $3</FormDescription>
                       <FormMessage />
@@ -318,12 +321,12 @@ export default function CreateSubscriptionPage() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                        {tokenOptions.map((o) => (
-                         <SelectItem key={o.key} value={o.key}>
-                                 {o.symbol}   {/* ← only the name */}
-                               </SelectItem>
-                               ))}
-                              </SelectContent>
+                          {tokenOptions.map((o) => (
+                            <SelectItem key={o.key} value={o.key}>
+                              {o.symbol} {/* ← only the name */}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
                       </Select>
                       <FormDescription></FormDescription>
                       <FormMessage />
@@ -341,7 +344,10 @@ export default function CreateSubscriptionPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Frequency</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="" />
@@ -369,7 +375,10 @@ export default function CreateSubscriptionPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Free trial period?</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="" />
@@ -394,7 +403,10 @@ export default function CreateSubscriptionPage() {
           </form>
         </Form>
         <p className="pb-16 px-8 text-center text-sm text-muted-foreground">
-          <Link href="/" className="hover:text-brand underline underline-offset-4">
+          <Link
+            href="/"
+            className="hover:text-brand underline underline-offset-4"
+          >
             Back to the dashboard
           </Link>
         </p>

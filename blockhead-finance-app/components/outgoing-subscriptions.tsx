@@ -1,8 +1,8 @@
 "use client"
 
-import {Contract} from "ethers";
+import { Contract } from "ethers"
 import React, { useEffect, useState } from "react"
-import { addressesByNetwork } from "@/constants"
+import { addressesByNetwork, tokenDecimalsByNetwork } from "@/constants"
 import { BigNumberish } from "@ethersproject/bignumber"
 import { formatUnits } from "@ethersproject/units"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
@@ -14,14 +14,15 @@ import { Button } from "@/components/ui/button"
 
 const supabase = createClientComponentClient()
 
-function useRecurringPayments(refresh: number, chainId: number, recurringPaymentContract?: Contract) {
+function useRecurringPayments(
+  refresh: number,
+  chainId: number,
+  recurringPaymentContract?: Contract
+) {
   const [loaded, setLoaded] = useState<number>(-1)
-  const [recurringPayments, setRecurringPayments] = useState<
-    Record<string, any>
-  >({})
+  const [recurringPayments, setRecurringPayments] = useState<Record<string, any>>({})
+  const { account } = useEthers()
 
-  const { account} = useEthers()
-  
   useEffect(() => {
     setLoaded(-1)
   }, [refresh])
@@ -29,55 +30,47 @@ function useRecurringPayments(refresh: number, chainId: number, recurringPayment
   useEffect(() => {
     async function inner() {
       try {
-        if (loaded === chainId || !recurringPaymentContract) {
-          return
-        }
-        console.log('outgoing payments loading...')
+        if (loaded === chainId || !recurringPaymentContract) return
+
+        console.log("outgoing payments loading…")
         setLoaded(chainId)
-        const recurringPaymentsLocal: Record<string, any> = {}
-        setRecurringPayments({})
-        const currentBlockTimestamp =
-          await recurringPaymentContract.getCurrentBlockTimestamp()
-        // find all payments for each subscription - get all payments for this user's address
-        const accountNumbers =
-          await recurringPaymentContract.getAccountNumbersByAddress(account)
+        const next: Record<string, any> = {}
+
+        const currentBlockTimestamp = await recurringPaymentContract.getCurrentBlockTimestamp()
+        const accountNumbers = await recurringPaymentContract.getAccountNumbersByAddress(account)
+
         for (const accountNumber of accountNumbers) {
           const [recurringPayment, additionalInformation] = await Promise.all([
             recurringPaymentContract.recurringPayments(accountNumber),
             recurringPaymentContract.getAdditionalInformation(accountNumber),
           ])
-          if (recurringPayment[1] !== account) {
-            continue
-          }
+
+          // Only show rows where *you* are the sender
+          if (recurringPayment[1] !== account) continue
+
           const paymentDue = recurringPayment[7].sub(currentBlockTimestamp)
-          const subscriptionId =
-            additionalInformation[0].split("subscriptionId:")[1]
+          const subscriptionId = additionalInformation[0].split("subscriptionId:")[1]
+
           const { data: subscription, error } = await supabase
             .from("subscription")
             .select("*")
             .eq("id", subscriptionId)
             .maybeSingle()
-          if (error) {
-            throw error
-          }
-          // if (!subscription || subscription.meta.network != chainId) {
-          //   continue
-          // }
-          const recurringPaymentArr = [...recurringPayment, subscription]
-          recurringPaymentArr[7] = paymentDue
-          recurringPaymentsLocal[accountNumber.toString()] = recurringPaymentArr
+
+          if (error) throw error
+
+          const row = [...recurringPayment, subscription]
+          row[7] = paymentDue // replace nextDue with delta seconds
+          next[accountNumber.toString()] = row
         }
-        setRecurringPayments(recurringPaymentsLocal)
+
+        setRecurringPayments(next)
       } catch (e) {
         console.error(e)
       }
     }
     inner()
-  }, [loaded, recurringPaymentContract])
-
-  // for (const subscription of data) {
-  //   subscription.payments = payments
-  // }
+  }, [loaded, recurringPaymentContract, chainId, supabase])
 
   return recurringPayments
 }
@@ -87,22 +80,19 @@ interface IOutgoingSubscriptions {
   chainId: number
   recurringPaymentContract?: Contract
 }
-export const OutgoingSubscriptions = ({refresh, chainId = 0, recurringPaymentContract}: IOutgoingSubscriptions) => {
+
+export const OutgoingSubscriptions = ({
+  refresh,
+  chainId = 0,
+  recurringPaymentContract,
+}: IOutgoingSubscriptions) => {
   const recurringPayments = useRecurringPayments(refresh, chainId, recurringPaymentContract)
-  
+
   async function cancelRecurringPayment(accountNumber: BigNumberish) {
-    if (!recurringPaymentContract) {
-      return
-    }
+    if (!recurringPaymentContract) return
     if (window.confirm("Are you sure you want to cancel this subscription?")) {
-      const gasLimit =
-        await recurringPaymentContract.estimateGas.cancelRecurringPayment(
-          accountNumber
-        )
-      const ret = await recurringPaymentContract.cancelRecurringPayment(
-        accountNumber,
-        { gasLimit }
-      )
+      const gasLimit = await recurringPaymentContract.estimateGas.cancelRecurringPayment(accountNumber)
+      const ret = await recurringPaymentContract.cancelRecurringPayment(accountNumber, { gasLimit })
       console.log(ret)
     }
   }
@@ -111,12 +101,10 @@ export const OutgoingSubscriptions = ({refresh, chainId = 0, recurringPaymentCon
     <div className="m-8 ">
       <div className="flex items-center justify-between px-2">
         <div className="flex items-center justify-between grow">
-          <h1 className="font-heading text-3xl md:text-4xl">
-            Outgoing Subscriptions
-          </h1>
+          <h1 className="font-heading text-3xl md:text-4xl">Outgoing Subscriptions</h1>
         </div>
-        {/*<p className="text-lg text-muted-foreground">Manage account and website settings.</p>*/}
       </div>
+
       <div className="mt-4 p-4 border border-gray-200 rounded-lg">
         <div>
           <div className="grid grid-cols-8 gap-2">
@@ -143,52 +131,64 @@ export const OutgoingSubscriptions = ({refresh, chainId = 0, recurringPaymentCon
             </div>
             <div></div>
           </div>
+
           {_.values(recurringPayments).map(
             ([
-              accountNumber,
-              sender,
-              recipientAddress,
-              amount,
-              token,
-              timeIntervalSeconds,
-              paymentInterface,
-              paymentDue,
-              cancelled,
-              subscription,
+              accountNumber,        // 0
+              sender,               // 1
+              recipientAddress,     // 2
+              amount,               // 3 (BigNumber, in token decimals)
+              tokenAddressOnChain,  // 4 (address)
+              timeIntervalSeconds,  // 5
+              paymentInterface,     // 6
+              paymentDue,           // 7 (delta seconds we set)
+              cancelled,            // 8 (bool)
+              subscription,         // 9 (record from Supabase)
             ]) => {
+              // Pull display metadata from the subscription meta
+              const chainIdForSub = Number(subscription?.meta?.network) || chainId || 0
+              const tokenKey = String(subscription?.meta?.token || "").toLowerCase()
+
+              // Token address column (same as incoming)
+              const tokenAddress =
+                tokenAddressOnChain ||
+                addressesByNetwork[chainIdForSub]?.[tokenKey] ||
+                ""
+
+              // Human amount + symbol column
+              const decimals =
+                tokenDecimalsByNetwork[chainIdForSub]?.[tokenKey] ??
+                (tokenKey === "usdc" ? 6 : 18)
+
+              const humanAmount = formatUnits(amount, decimals)
+              const symbol = (subscription?.meta?.token || "").toUpperCase()
+
               return (
-                <div
-                  key={accountNumber.toString()}
-                  className="grid grid-cols-8 gap-2"
-                >
-                  <div className="">
-                    {/*<div className="">{id}</div>*/}
+                <div key={accountNumber.toString()} className="grid grid-cols-8 gap-2">
+                  <div>
                     <div className="">{subscription?.meta?.recipientName}</div>
                     <div className="truncate">{recipientAddress}</div>
                   </div>
+
                   <div>{subscription?.meta?.productName}</div>
-                  <div>
-                    {addressesByNetwork[subscription?.meta?.network]?.name ||
-                      ""}
-                  </div>
-                  <div className="truncate">{token.toUpperCase()}</div>
+
+                  <div>{addressesByNetwork[chainIdForSub]?.name || ""}</div>
+
+                  {/* TOKEN column: contract address (hex) */}
+                  <div className="truncate">{tokenAddress}</div>
+
+                  {/* AMOUNT column: human-readable + symbol */}
                   <div className="truncate">
-                    <>
-                      {/* use contract.decimals() to get decimals...*/}
-                      {formatUnits(amount, 6)}{" "}
-                      {(
-                        addressesByNetwork[chainId || 0]?.[token] || ""
-                      ).toUpperCase()}
-                    </>
+                    {humanAmount} {symbol}
                   </div>
+
                   <div>{paymentDueSecondsToDays(paymentDue)} days</div>
+
                   <div>{!cancelled ? "Yes" : "No"}</div>
+
                   <div>
                     {!cancelled && (
-                      <Button
-                        size="sm"
-                        onClick={() => cancelRecurringPayment(accountNumber)}
-                      >
+                      <Button size="sm" onClick={() => cancelRecurringPayment(accountNumber)}>
                         Cancel
                       </Button>
                     )}

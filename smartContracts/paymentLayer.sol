@@ -66,7 +66,7 @@ contract RecurringPayments {
     uint256 public totalPayments;
     address public duh;
     address public automationLayerAddress;
-    uint256 public serviceFee = 9900;
+    uint256 public serviceFee = 100;
     uint256 public precission = 10000;
     uint256 public feeSplit = 5000;
     uint256[] public cancelledAccounts;

@@ -9,7 +9,7 @@ export const subscriptionSchema = z.object({
   amount: z.coerce.number().min(0.01),
  // token: z.enum(["usdc"]),
   token: z.string().min(1),
-  frequency: z.enum(["daily", "weekly", "monthly", "yearly"]),
+  frequency: z.enum(["daily", "weekly", "monthly", "Annual"]),
   trial: z.enum(["none", "day", "week", "biweek", "month"]),
 })
 

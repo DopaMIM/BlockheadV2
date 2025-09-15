@@ -1,5 +1,4 @@
 //import required dependencies
-
 const { automationLayerABI, sequencerABI } = require("./ABIs");
 
 
@@ -9,15 +8,16 @@ require("dotenv").config();
 
 
 const providers = [
-  process.env.POLYGON_WSS
+  process.env.ARBITRUM_WSS
 ];
+console.log(providers)
 const randomProvider = Math.floor(Math.random() * providers.length);
 const provider = new ethers.providers.WebSocketProvider(
   providers[randomProvider]
 );
-const automationLayerContractAddress = "0x5fc876A1e9BB3f6c76990C4248b23F1B64E3c8dB" //"0x62f43fb9832e83cde2380327fad8d46e77ad0bc8"
+const automationLayerContractAddress = "0x1Bb81875e6133a4791a8FaB68aF6e455de9E1B04" //"0x62f43fb9832e83cde2380327fad8d46e77ad0bc8"
 
-const sequencerAddress = "0xf0B8323833eb9fed846a99d0C9A2EE3A8fcA32bf" // "0x702A1Fe16B6ff595E9E2AaAfa1e8e760Df88588C";
+const sequencerAddress = "0x60375d0aDA5225845fcC12945F8Fd86144E6F413" // "0x702A1Fe16B6ff595E9E2AaAfa1e8e760Df88588C";
 console.log(provider.connection.url);
 
 const wallet = new ethers.Wallet(process.env.TEST_ACCOUNT);
@@ -96,15 +96,15 @@ const init = async () => {
           if (receipt && receipt.blockNumber && receipt.status === 1) {
             // 0 - failed, 1 - success
             console.log(
-              `Transaction https://lineascan.build/tx/${receipt.transactionHash} mined, status success`
+              `Transaction https://explorer.optimism.io/tx/${receipt.transactionHash} mined, status success`
             );
           } else if (receipt && receipt.blockNumber && receipt.status === 0) {
             console.log(
-              `Transaction https://lineascan.build/tx/${receipt.transactionHash}} mined, status failed`
+              `Transaction https://explorer.optimism.io/tx/${receipt.transactionHash}} mined, status failed`
             );
           } else {
             console.log(
-              `Transaction https://lineascan.build/tx/${receipt.transactionHash}} not mined`
+              `Transaction https://explorer.optimism.io/tx/${receipt.transactionHash}} not mined`
             );
           }
         }
@@ -114,7 +114,7 @@ const init = async () => {
   } else {
     console.log("Not Current Node");
   }
-  await timer(60000);
+  await timer(300000);
   init();
 };
 init();

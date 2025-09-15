@@ -3,14 +3,16 @@
 import { useState } from "react"
 import Link from "next/link"
 import { UI_PARTNER_ADDRESS, addressesByNetwork, tokenDecimalsByNetwork } from "@/constants"
-import { parseUnits } from "@ethersproject/units"
+import { parseUnits, formatUnits } from "@ethersproject/units" // NEW: formatUnits
 import {
   ERC20Interface,
   useEthers,
   useSigner,
   useTokenAllowance,
+  useTokenBalance,       // NEW
+  useEtherBalance,       // NEW (for a gentle gas warning)
 } from "@usedapp/core"
-import { BigNumber, Contract } from "ethers"
+import { BigNumber, Contract, utils as v5 } from "ethers"
 
 import { useRecurringPaymentContract } from "@/lib/use-recurring-payment-contract"
 import { frequencyToSeconds } from "@/lib/utils"
@@ -33,62 +35,102 @@ export default function CreateRecurringPaymentForm({
   const [loading, setLoading] = useState(false)
 
   const subscriptionChainId = parseInt(subscription.meta.network, 10)
+  const tokenKey = (subscription.meta.token || "").toLowerCase()
 
   // Auto-switch to required chain if needed
   if (subscriptionChainId !== chainId || error?.name === "ChainIdError") {
     switchNetwork(subscriptionChainId)
   }
 
-  // --- Fixed merchant-designated token (no dropdown) ---
-  const tokenKey = (subscription.meta.token || "").toLowerCase()
-
   // Prefer values saved at creation; fall back to constants
-  const subscriptionTokenAddress =
-    // @ts-expect-error meta may include these optional fields
-    subscription.meta?.tokenAddress ??
+  // @ts-expect-error meta may include these optional fields
+  const savedAddr: string | undefined = subscription.meta?.tokenAddress
+  const tokenAddress =
+    savedAddr ??
     addressesByNetwork[subscriptionChainId]?.[tokenKey] ??
     ""
 
+  // Validate token address early
+  const isTokenAddrValid = v5.isAddress(tokenAddress)
+
+  const spender =
+    addressesByNetwork[subscriptionChainId]?.recurringPayments ?? ""
+
+  const isSpenderValid = v5.isAddress(spender)
+
+  // Prefer saved decimals; fall back to constants; default 6 for USDC else 18
+  // @ts-expect-error meta may include these optional fields
+  const savedDec: number | undefined = subscription.meta?.tokenDecimals
   const tokenDecimals =
-    // @ts-expect-error meta may include these optional fields
-    subscription.meta?.tokenDecimals ??
+    savedDec ??
     tokenDecimalsByNetwork[subscriptionChainId]?.[tokenKey] ??
     (tokenKey === "usdc" ? 6 : 18)
 
   const amountInWei = parseUnits(subscription.meta.amount.toString(), tokenDecimals)
 
+  // Recurring payments contract for this chain
   const recurringPaymentContract = useRecurringPaymentContract(subscriptionChainId)
 
-  const subscriptionToken = new Contract(
-    subscriptionTokenAddress,
-    ERC20Interface,
-    signer
+  // Only construct contract if everything is valid and signer exists
+  const subscriptionToken =
+    signer && isTokenAddrValid
+      ? new Contract(tokenAddress, ERC20Interface, signer)
+      : null
+
+  // Allowance for EXACT spender we use for approve/subscribe
+  const allowance = useTokenAllowance(
+    isTokenAddrValid ? tokenAddress : undefined,
+    account,
+    isSpenderValid ? spender : undefined
   )
 
-  // Check allowance for this subscription's token against the spender
-  const allowance = useTokenAllowance(
-    subscriptionTokenAddress,
-    account,
-    addressesByNetwork[subscriptionChainId]?.recurringPayments
+  // --- NEW: balances ---
+  // User's ERC-20 balance for the chosen token (on the required chain)
+  const tokenBalance = useTokenBalance(
+    isTokenAddrValid ? tokenAddress : undefined,
+    account
   )
+
+  // Optional: native gas balance (ETH on the target L2) for a friendly warning
+  const nativeBalance = useEtherBalance(account)
+
+  // Require allowance >= amount needed
   const hasAllowance =
     BigNumber.isBigNumber(allowance) && allowance.gte(amountInWei)
 
-  // Approve (large buffer) using correct decimals
+  // NEW: must have at least the first payment amount available
+  const hasFunds =
+    BigNumber.isBigNumber(tokenBalance) && tokenBalance.gte(amountInWei)
+
+  // NEW: nicely formatted numbers for the UI
+  const amountHuman = formatUnits(amountInWei, tokenDecimals)
+  const balanceHuman = tokenBalance ? formatUnits(tokenBalance, tokenDecimals) : "0"
+
+  // NEW: soft gas warning threshold (you can tune this)
+  const lowGasThreshold = parseUnits("0.0001", 18)
+  const showLowGasWarning =
+    nativeBalance && BigNumber.isBigNumber(nativeBalance) && nativeBalance.lt(lowGasThreshold)
+
   async function approveToken() {
     setLoading(true)
     try {
-      if (subscriptionToken) {
-        await subscriptionToken.approve(
-          addressesByNetwork[subscriptionChainId]?.recurringPayments,
-          parseUnits("10000000", tokenDecimals)
-        )
+      if (!subscriptionToken || !isSpenderValid) {
+        throw new Error("Token or spender not configured for this chain.")
       }
+
+      // generous allowance but correct decimals
+      const tx = await subscriptionToken.approve(
+        spender,
+        parseUnits("10000000", tokenDecimals)
+      )
+      await tx.wait() // wait so useTokenAllowance picks up the new allowance
+
       toast({
-        title: "Approval submitted.",
-        description: `Approving ${tokenKey.toUpperCase()}…`,
+        title: "Approval submitted",
+        description: `Approved ${tokenKey.toUpperCase()} for recurring payments.`,
       })
     } catch (e: any) {
+      console.error(e)
       toast({
         title: "Approval failed",
         description: e?.message ?? "Please try again.",
@@ -102,14 +144,19 @@ export default function CreateRecurringPaymentForm({
   async function approveSubscription() {
     setLoading(true)
     try {
-      if (!subscriptionToken || !recurringPaymentContract) {
-        return
+      if (!recurringPaymentContract || !subscriptionToken || !isTokenAddrValid || !isSpenderValid) {
+        throw new Error("Missing contract, token, or address configuration.")
+      }
+
+      // NEW: refuse early if insufficient funds (extra safety; UI already disables)
+      if (!hasFunds) {
+        throw new Error(`Insufficient ${tokenKey.toUpperCase()} for first payment.`)
       }
 
       const functionArgs = [
         subscription.meta.receiverAddress,
         amountInWei,
-        subscriptionTokenAddress,
+        tokenAddress,
         frequencyToSeconds(subscription.meta.frequency),
         UI_PARTNER_ADDRESS,
         [`subscriptionId:${subscription.id}`],
@@ -120,29 +167,19 @@ export default function CreateRecurringPaymentForm({
         await recurringPaymentContract.estimateGas.createRecurringPayment(
           ...functionArgs
         )
-      // @ts-ignore usedapp returns { value, error } in some hooks; direct contract call returns tx
-      const { value, error } =
-        await recurringPaymentContract.createRecurringPayment(
-          ...functionArgs,
-          { gasLimit }
-        )
 
-      if (error) {
-        console.error(error.message)
-        toast({
-          title: "Something went wrong.",
-          description:
-            "Your create recurring payment request failed. Please try again.",
-          variant: "destructive",
-        })
-        return
-      }
+      const tx = await recurringPaymentContract.createRecurringPayment(
+        ...functionArgs,
+        { gasLimit }
+      )
+      await tx.wait()
 
       toast({
         title: "Success!",
         description: "You created a recurring payment.",
       })
     } catch (e: any) {
+      console.error(e)
       toast({
         title: "Transaction failed",
         description: e?.message ?? "Please try again.",
@@ -152,6 +189,28 @@ export default function CreateRecurringPaymentForm({
       setLoading(false)
     }
   }
+
+  // Friendly guard rails for misconfiguration
+  if (!isTokenAddrValid || !isSpenderValid) {
+    return (
+      <div className="container flex h-screen w-screen items-center justify-center">
+        <div className="text-center space-y-3">
+          <p className="text-red-500 font-medium">Payment configuration missing for this chain/token.</p>
+          <p className="text-sm text-muted-foreground">
+            Chain: {subscriptionChainId} — Token: {tokenKey.toUpperCase()}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // NEW: decide button label/disabled state
+  const approveDisabled = !account || loading || !subscriptionToken
+  const subscribeDisabled = !account || loading || !recurringPaymentContract || !hasFunds
+
+  const subscribeLabel = !hasFunds
+    ? "Insufficient funds"
+    : (loading ? "Submitting..." : "Subscribe")
 
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
@@ -192,6 +251,26 @@ export default function CreateRecurringPaymentForm({
               </ul>
             </div>
 
+            {/* NEW: balance check + messages */}
+            <div className="rounded-md bg-gray-50 p-4 text-left">
+              <p className="text-sm">
+                Required first payment: <span className="font-medium">{amountHuman} {tokenKey.toUpperCase()}</span>
+              </p>
+              <p className="text-sm">
+                Your balance: <span className="font-medium">{balanceHuman} {tokenKey.toUpperCase()}</span>
+              </p>
+              {!hasFunds && (
+                <p className="mt-2 text-sm text-red-600">
+                  You don’t have enough {tokenKey.toUpperCase()} to cover the first payment.
+                </p>
+              )}
+              {showLowGasWarning && (
+                <p className="mt-2 text-xs text-amber-600">
+                  Heads up: your gas balance looks low. You’ll need a small amount of ETH on this network to submit transactions.
+                </p>
+              )}
+            </div>
+
             <div className="flex flex-col gap-4 text-center">
               <div>
                 <h4 className="text-7xl font-bold">
@@ -221,18 +300,18 @@ export default function CreateRecurringPaymentForm({
           {!hasAllowance ? (
             <Button
               variant="secondary"
-              disabled={!account || loading}
+              disabled={approveDisabled}
               onClick={approveToken}
             >
-              Approve {tokenKey.toUpperCase()}
+              {loading ? "Approving..." : `Approve ${tokenKey.toUpperCase()}`}
             </Button>
           ) : (
             <Button
               type="submit"
-              disabled={!account || loading}
+              disabled={subscribeDisabled}
               onClick={approveSubscription}
             >
-              Subscribe
+              {subscribeLabel}
             </Button>
           )}
 

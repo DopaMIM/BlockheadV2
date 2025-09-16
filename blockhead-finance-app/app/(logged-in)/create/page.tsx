@@ -45,7 +45,7 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { toast } from "@/components/ui/use-toast"
 import { Icons } from "@/components/icons"
-
+export const dynamic = 'force-dynamic';
 // Mainnets (and testnets you want available). Order as you like.
 const SUPPORTED_CHAIN_IDS: number[] = [
   //EthereumMainnetChainId,

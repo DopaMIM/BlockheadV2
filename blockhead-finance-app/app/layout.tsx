@@ -10,7 +10,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { TailwindIndicator } from "@/components/tailwind-indicator"
 import { ThemeProvider } from "@/components/theme-provider"
 import { UseDAppProvider } from "@/components/usedapp-provider"
-
+export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: {
     default: siteConfig.name,

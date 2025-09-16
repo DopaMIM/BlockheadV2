@@ -1,15 +1,29 @@
-import { NextResponse, type NextRequest } from "next/server"
-import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs"
+// middleware.ts (Edge-safe)
+import type { NextRequest } from "next/server"
+import { NextResponse } from "next/server"
 
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next()
+// Protect only the /create route. Add more paths to the matcher if needed.
+export const config = {
+  matcher: ["/create"],
+}
 
-  // Create a Supabase client configured to use cookies
-  const supabase = createMiddlewareClient({ req, res })
+export function middleware(req: NextRequest) {
+  const url = req.nextUrl
+  const pathname = url.pathname
 
-  // Refresh session if expired - required for Server Components
-  // https://supabase.com/docs/guides/auth/auth-helpers/nextjs#managing-session-with-middleware
-  await supabase.auth.getSession()
+  // Supabase Auth sets these cookies on the domain.
+  const hasAccess = Boolean(req.cookies.get("sb-access-token")?.value)
+  const hasRefresh = Boolean(req.cookies.get("sb-refresh-token")?.value)
 
-  return res
+  // If user isn't logged in, redirect to /login?next=<original>
+  if (!hasAccess && !hasRefresh) {
+    const loginUrl = url.clone()
+    loginUrl.pathname = "/login"
+    // preserve where the user wanted to go
+    loginUrl.searchParams.set("next", pathname + (url.search || ""))
+    return NextResponse.redirect(loginUrl)
+  }
+
+  // Authenticated—proceed
+  return NextResponse.next()
 }

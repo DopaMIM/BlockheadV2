@@ -1,23 +1,23 @@
 // middleware.ts
-import { NextResponse, type NextRequest } from "next/server";
-import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs";
+import { NextResponse, type NextRequest } from 'next/server';
+import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
 
-// ✅ Force Node runtime so you don't have to deal with Edge locally
-export const runtime = "nodejs";
-
-// (optional) limit where middleware runs (skip static assets)
-export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
-};
+// Keep this file MINIMAL: only next/server and auth-helpers.
+// Do NOT import anything that touches 'fs', 'path', 'url', 'stream' or 'next' (root).
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
 
-  // Supabase client bound to cookies for auth session refresh
+  // Edge-compatible Supabase client bound to cookies
   const supabase = createMiddlewareClient({ req, res });
 
-  // Keep the session fresh for server components / RLS
-  await supabase.auth.getSession();
+  // This will refresh the session cookie if needed (Edge-safe)
+  await supabase.auth.getUser(); // ← use getUser() instead of getSession()
 
   return res;
 }
+
+// (Optional) Narrow where middleware runs (avoid static assets)
+export const config = {
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+};

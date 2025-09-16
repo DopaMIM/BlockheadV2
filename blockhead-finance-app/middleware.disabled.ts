@@ -30,3 +30,6 @@ export function middleware(req: NextRequest) {
   return NextResponse.next()
 }
 */
+// Middleware disabled in production.
+// Keeping this file so TypeScript isolatedModules is happy.
+export {}

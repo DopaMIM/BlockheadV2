@@ -1,4 +1,6 @@
 // middleware.ts (Edge-safe)
+//comment out this file as it throws errors in productions
+/* 
 import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
 
@@ -27,3 +29,4 @@ export function middleware(req: NextRequest) {
   // Authenticated—proceed
   return NextResponse.next()
 }
+*/

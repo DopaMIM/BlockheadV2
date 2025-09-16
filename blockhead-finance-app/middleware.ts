@@ -1,41 +1,23 @@
-// Edge-safe Supabase middleware: refresh session & gate /create
+// middleware.ts
+import { NextResponse, type NextRequest } from "next/server";
+import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs";
 
-import type { NextRequest } from "next/server"
-import { NextResponse } from "next/server"
-import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs"
+// ✅ Force Node runtime so you don't have to deal with Edge locally
+export const runtime = "nodejs";
 
-// ✅ Restrict to only the paths that need auth checks to minimize edge work.
-// Add more paths (e.g., "/dashboard", "/settings") as needed.
+// (optional) limit where middleware runs (skip static assets)
 export const config = {
-  matcher: ["/create"],
-}
-
-// ✅ Always edge for middleware
-export const runtime = "edge"
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+};
 
 export async function middleware(req: NextRequest) {
-  // Use a mutable response so the helper can set refreshed cookies if needed.
-  const res = NextResponse.next()
+  const res = NextResponse.next();
 
-  // Create an edge-safe Supabase client bound to request/response cookies.
-  const supabase = createMiddlewareClient({ req, res })
+  // Supabase client bound to cookies for auth session refresh
+  const supabase = createMiddlewareClient({ req, res });
 
-  // 1) Refresh session if it’s expired (non-blocking beyond the awaited call).
-  //    This ensures RSC/APIs see fresh auth state after this middleware runs.
-  await supabase.auth.getSession()
+  // Keep the session fresh for server components / RLS
+  await supabase.auth.getSession();
 
-  // 2) Protect /create: redirect unauthenticated users to /login
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-
-  if (!session) {
-    const loginUrl = req.nextUrl.clone()
-    loginUrl.pathname = "/login"
-    loginUrl.searchParams.set("next", req.nextUrl.pathname + (req.nextUrl.search || ""))
-    return NextResponse.redirect(loginUrl)
-  }
-
-  // Authenticated → continue
-  return res
+  return res;
 }
